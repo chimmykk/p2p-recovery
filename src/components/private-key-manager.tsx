@@ -16,10 +16,20 @@ import {
     deriveSmartAccountAddress,
     getTokenBalance,
     isAccountDeployed,
-    deploySmartAccount
+    deploySmartAccount,
+    ERC20_ABI,
+    SMART_ACCOUNT_ABI,
+    ENTRY_POINT_ABI,
+    getUserOpHash,
+    formatUserOpForBundler,
+    bundlerRpc,
+    getInitCode
 } from '@/lib/smart-account'
-import { Key, Trash2, Wallet, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Rocket, Copy, X, AlertTriangle } from 'lucide-react'
-import { NETWORKS, type NetworkKey } from '@/lib/network'
+import { Key, Trash2, Wallet, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Rocket, Copy, X, AlertTriangle, ArrowDownLeft } from 'lucide-react'
+import { NETWORKS, type NetworkKey, NETWORK_LABELS } from '@/lib/network'
+import { encodeFunctionData, createPublicClient, http, Address as ViemAddress } from 'viem'
+
+const DUMMY_SIGNATURE = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c'
 
 interface PrivateKeyManagerProps {
     network: NetworkKey;
@@ -42,6 +52,9 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
     const [deployTxHash, setDeployTxHash] = useState<string>('')
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [fundingAddress, setFundingAddress] = useState<string>('')
+    const [withdrawAmount, setWithdrawAmount] = useState<string>('')
+    const [isWithdrawing, setIsWithdrawing] = useState(false)
+    const [withdrawTxHash, setWithdrawTxHash] = useState<string>('')
 
     useEffect(() => {
         // Check if there's a stored private key
@@ -256,6 +269,182 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
         setTimeout(() => setSuccess(''), 2000)
     }
 
+    const handleWithdraw = async () => {
+        setError('')
+        setSuccess('')
+        setWithdrawTxHash('')
+
+        // Validation
+        if (!hasStoredKey || !smartAccountAddress || !ownerAddress) {
+            setError('Please derive your smart account address first')
+            return
+        }
+
+        if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+            setError('Invalid withdrawal amount')
+            return
+        }
+
+        const networkConfig = NETWORKS[network];
+        const multiplier = Math.pow(10, networkConfig.usdcDecimals)
+        const transferAmount = BigInt(Math.round(parseFloat(withdrawAmount) * multiplier))
+        const currentBalance = BigInt(Math.round(parseFloat(balance) * multiplier))
+
+        if (transferAmount > currentBalance) {
+            setError(`Insufficient balance. You have ${balance} USDC`)
+            return
+        }
+
+        setIsWithdrawing(true)
+
+        try {
+            const signer = getAccountFromPrivateKey(privateKey)
+
+            // Create public client
+            const publicClient = createPublicClient({
+                chain: networkConfig.chain,
+                transport: http(networkConfig.chain.rpcUrls.default.http[0]),
+            })
+
+            // Check if account is deployed
+            const deployed = await isAccountDeployed(smartAccountAddress as ViemAddress, network)
+
+            // Generate initCode if account is not deployed
+            let initCode: `0x${string}` = '0x'
+            if (!deployed) {
+                initCode = getInitCode(networkConfig.factoryAddress, signer.address)
+            }
+
+            // Get nonce
+            const nonce = await publicClient.readContract({
+                address: networkConfig.entryPoint,
+                abi: ENTRY_POINT_ABI,
+                functionName: 'getNonce',
+                args: [smartAccountAddress as ViemAddress, 0n],
+            })
+
+            // Encode transfer call to owner address
+            const transferCallData = encodeFunctionData({
+                abi: ERC20_ABI,
+                functionName: 'transfer',
+                args: [ownerAddress as ViemAddress, transferAmount],
+            })
+
+            // Wrap in smart account execute
+            const executeCallData = encodeFunctionData({
+                abi: SMART_ACCOUNT_ABI,
+                functionName: 'execute',
+                args: [networkConfig.usdcAddress, 0n, transferCallData],
+            })
+
+            // Get gas prices from Pimlico
+            let maxFeePerGas: bigint
+            let maxPriorityFeePerGas: bigint
+
+            try {
+                const gasPrices = await bundlerRpc('pimlico_getUserOperationGasPrice', [], networkConfig.bundlerUrl)
+                maxFeePerGas = BigInt(gasPrices.standard.maxFeePerGas)
+                maxPriorityFeePerGas = BigInt(gasPrices.standard.maxPriorityFeePerGas)
+            } catch (e) {
+                console.warn('Failed to get Pimlico gas prices, using fallback:', e)
+                maxFeePerGas = 1500000000n;
+                maxPriorityFeePerGas = 1500000000n;
+            }
+
+            // Build UserOperation
+            let userOp = {
+                sender: smartAccountAddress,
+                nonce: nonce,
+                initCode: initCode,
+                callData: executeCallData,
+                callGasLimit: 300000n,
+                verificationGasLimit: deployed ? 300000n : 1000000n,
+                preVerificationGas: 500000n,
+                maxFeePerGas: maxFeePerGas,
+                maxPriorityFeePerGas: maxPriorityFeePerGas,
+                paymasterAndData: '0x' as `0x${string}`,
+                signature: DUMMY_SIGNATURE as `0x${string}`,
+            }
+
+            // Estimate gas
+            try {
+                const gasEstimate = await bundlerRpc('eth_estimateUserOperationGas', [
+                    formatUserOpForBundler(userOp),
+                    networkConfig.entryPoint,
+                ], networkConfig.bundlerUrl)
+
+                if (gasEstimate) {
+                    userOp.callGasLimit = BigInt(gasEstimate.callGasLimit || '0x493e0')
+                    userOp.verificationGasLimit = BigInt(gasEstimate.verificationGasLimit || '0x493e0')
+                    userOp.preVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x7a120')
+                }
+            } catch (e: any) {
+                console.warn('Gas estimation failed, using defaults:', e.message)
+            }
+
+            // Sign UserOperation
+            userOp.signature = '0x' as `0x${string}`
+            const userOpHash = getUserOpHash(userOp, networkConfig.entryPoint, networkConfig.chain.id)
+            const signature = await signer.signMessage({
+                message: { raw: userOpHash },
+            })
+            userOp.signature = signature
+
+            // Submit to bundler
+            const formattedUserOp = formatUserOpForBundler(userOp)
+            const userOpHashResult = await bundlerRpc('eth_sendUserOperation', [
+                formattedUserOp,
+                networkConfig.entryPoint,
+            ], networkConfig.bundlerUrl)
+
+            setSuccess(`Withdrawal submitted! UserOp Hash: ${userOpHashResult}`)
+
+            // Wait for receipt
+            let receipt = null
+            let attempts = 0
+
+            while (!receipt && attempts < 30) {
+                await new Promise(r => setTimeout(r, 2000))
+                try {
+                    receipt = await bundlerRpc('eth_getUserOperationReceipt', [userOpHashResult], networkConfig.bundlerUrl)
+                } catch (e) {
+                    // Receipt not ready yet
+                }
+                attempts++
+            }
+
+            if (receipt) {
+                setWithdrawTxHash(receipt.receipt?.transactionHash || '')
+                const deployMsg = !deployed ? ' (Account deployed and withdrawal completed!)' : ''
+                setSuccess(`Withdrawal successful! ${withdrawAmount} USDC sent to owner${deployMsg}`)
+
+                // Refresh balance
+                await fetchBalance(smartAccountAddress as ViemAddress)
+
+                // Reset form
+                setWithdrawAmount('')
+
+                // Notify components to refresh deployment status
+                window.dispatchEvent(new Event('smartAccountUpdated'))
+            } else {
+                setSuccess(`Withdrawal pending. Check explorer for UserOp: ${userOpHashResult}`)
+            }
+
+        } catch (err: any) {
+            const errorMessage = err.message || 'Failed to withdraw tokens'
+            // Check if it's an AA21 error (insufficient gas)
+            if (errorMessage.includes('AA21') || errorMessage.includes("didn't pay prefund")) {
+                setFundingAddress(smartAccountAddress)
+                setShowFundingModal(true)
+            } else {
+                setError(errorMessage)
+            }
+            console.error('Withdrawal error:', err)
+        } finally {
+            setIsWithdrawing(false)
+        }
+    }
+
     return (
         <div className="space-y-6">
             {/* Private Key Input Section */}
@@ -462,6 +651,76 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                                     <p className="text-sm text-black font-bold mb-1">USDC BALANCE</p>
                                     <p className="text-2xl font-black text-black">${balance}</p>
                                 </div>
+
+                                {/* Withdraw to Owner Section */}
+                                {isDeployed && parseFloat(balance) > 0 && (
+                                    <div className="p-4 bg-purple-50 border-3 border-purple-500 rounded-xl">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <ArrowDownLeft className="w-5 h-5 text-purple-600" />
+                                            <p className="text-sm text-black font-bold">WITHDRAW TO OWNER</p>
+                                        </div>
+                                        <p className="text-xs text-gray-700 font-medium mb-3">
+                                            Send USDC from smart account to owner address
+                                        </p>
+
+                                        {/* Amount Input */}
+                                        <div className="mb-3">
+                                            <label className="block text-xs font-bold text-black mb-1">
+                                                AMOUNT (USDC)
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={withdrawAmount}
+                                                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                                                    placeholder="0.00"
+                                                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-sm"
+                                                />
+                                                <button
+                                                    onClick={() => setWithdrawAmount(balance)}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-bold bg-purple-400 hover:bg-purple-500 text-black rounded border border-black transition-colors"
+                                                >
+                                                    MAX
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Withdraw Button */}
+                                        <button
+                                            onClick={handleWithdraw}
+                                            disabled={isWithdrawing}
+                                            className="w-full px-4 py-2 bg-purple-400 hover:bg-purple-500 disabled:bg-gray-400 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-black text-sm"
+                                        >
+                                            {isWithdrawing ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    WITHDRAWING...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ArrowDownLeft className="w-4 h-4" />
+                                                    WITHDRAW TO OWNER
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {/* Withdraw Transaction Hash */}
+                                        {withdrawTxHash && (
+                                            <div className="mt-3 p-3 bg-green-100 border-2 border-green-500 rounded-lg">
+                                                <p className="text-xs text-black font-bold mb-1">TX HASH</p>
+                                                <a
+                                                    href={`${NETWORKS[network].chain.blockExplorers.default.url}/tx/${withdrawTxHash}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs text-black font-mono break-all hover:text-green-700 transition-colors underline"
+                                                >
+                                                    {withdrawTxHash}
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
