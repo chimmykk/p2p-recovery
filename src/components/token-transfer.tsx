@@ -28,6 +28,7 @@ interface TokenTransferProps {
 }
 
 export function TokenTransfer({ network }: TokenTransferProps) {
+    const [transferMode, setTransferMode] = useState<'send' | 'recover'>('send')
     const [recipient, setRecipient] = useState('')
     const [amount, setAmount] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -35,6 +36,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
     const [success, setSuccess] = useState('')
     const [txHash, setTxHash] = useState('')
     const [smartAccountAddress, setSmartAccountAddress] = useState('')
+    const [ownerAddress, setOwnerAddress] = useState('')
     const [balance, setBalance] = useState('0')
     const [hasPrivateKey, setHasPrivateKey] = useState(false)
     const [showFundingModal, setShowFundingModal] = useState(false)
@@ -49,6 +51,9 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             if (accountData?.smartAccountAddress) {
                 setSmartAccountAddress(accountData.smartAccountAddress)
                 fetchBalance(accountData.smartAccountAddress as Address)
+            }
+            if (accountData?.ownerAddress) {
+                setOwnerAddress(accountData.ownerAddress)
             }
         }
 
@@ -116,7 +121,10 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             return
         }
 
-        if (!recipient || !recipient.startsWith('0x')) {
+        // For recover mode, use owner address as recipient
+        const finalRecipient = transferMode === 'recover' ? ownerAddress : recipient
+
+        if (!finalRecipient || !finalRecipient.startsWith('0x')) {
             setError('Invalid recipient address')
             return
         }
@@ -172,7 +180,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             const transferCallData = encodeFunctionData({
                 abi: ERC20_ABI,
                 functionName: 'transfer',
-                args: [recipient as Address, transferAmount],
+                args: [finalRecipient as Address, transferAmount],
             })
 
             // Wrap in smart account execute
@@ -261,13 +269,18 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             if (receipt) {
                 setTxHash(receipt.receipt?.transactionHash || '')
                 const deployMsg = !deployed ? ' (Account deployed and transfer completed!)' : ''
-                setSuccess(`Transfer successful! ${amount} USDC sent to ${recipient}${deployMsg}`)
+                const actionMsg = transferMode === 'recover'
+                    ? `Recovery successful! ${amount} USDC sent to owner address`
+                    : `Transfer successful! ${amount} USDC sent to ${finalRecipient}`
+                setSuccess(`${actionMsg}${deployMsg}`)
 
                 // Refresh balance
                 await fetchBalance(smartAccountAddress as Address)
 
                 // Reset form
-                setRecipient('')
+                if (transferMode === 'send') {
+                    setRecipient('')
+                }
                 setAmount('')
 
                 // Notify components to refresh deployment status
@@ -314,8 +327,57 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                     <span className="px-3 py-1 bg-blue-400 text-black text-xs font-bold rounded-full border-2 border-black">
                         TRANSFER
                     </span>
-                    <h2 className="text-xl font-black text-black mt-2">SEND USDC</h2>
+                    <h2 className="text-xl font-black text-black mt-2">TOKEN TRANSFER</h2>
                 </div>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="flex gap-2 mb-4">
+                <button
+                    onClick={() => {
+                        setTransferMode('send')
+                        setError('')
+                        setSuccess('')
+                    }}
+                    className={`flex-1 px-4 py-3 font-bold rounded-xl transition-all border-3 border-black ${transferMode === 'send'
+                        ? 'bg-blue-400 text-black'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                >
+                    <div className="flex items-center justify-center gap-2">
+                        <Send className="w-4 h-4" />
+                        SEND USDC
+                    </div>
+                </button>
+                <button
+                    onClick={() => {
+                        setTransferMode('recover')
+                        setError('')
+                        setSuccess('')
+                    }}
+                    className={`flex-1 px-4 py-3 font-bold rounded-xl transition-all border-3 border-black ${transferMode === 'recover'
+                        ? 'bg-purple-400 text-black'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                >
+                    <div className="flex items-center justify-center gap-2">
+                        <ArrowRight className="w-4 h-4 rotate-180" />
+                        RECOVER TO OWNER
+                    </div>
+                </button>
+            </div>
+
+            {/* Mode Description */}
+            <div className={`p-3 rounded-xl border-2 mb-6 ${transferMode === 'send'
+                ? 'bg-blue-50 border-blue-400'
+                : 'bg-purple-50 border-purple-400'
+                }`}>
+                <p className="text-sm text-gray-700 font-medium">
+                    {transferMode === 'send'
+                        ? 'Send USDC from your smart account to any address'
+                        : 'Recover USDC from your smart account back to your owner wallet'
+                    }
+                </p>
             </div>
 
             <div className="space-y-4">
@@ -327,18 +389,31 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 </div>
 
                 {/* Recipient Input */}
-                <div>
-                    <label className="block text-sm font-bold text-black mb-2">
-                        RECIPIENT ADDRESS
-                    </label>
-                    <input
-                        type="text"
-                        value={recipient}
-                        onChange={(e) => setRecipient(e.target.value)}
-                        placeholder="0x..."
-                        className="w-full px-4 py-3 bg-gray-50 border-3 border-black rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium"
-                    />
-                </div>
+                {transferMode === 'send' ? (
+                    <div>
+                        <label className="block text-sm font-bold text-black mb-2">
+                            RECIPIENT ADDRESS
+                        </label>
+                        <input
+                            type="text"
+                            value={recipient}
+                            onChange={(e) => setRecipient(e.target.value)}
+                            placeholder="0x..."
+                            className="w-full px-4 py-3 bg-gray-50 border-3 border-black rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium"
+                        />
+                    </div>
+                ) : (
+                    <div>
+                        <label className="block text-sm font-bold text-black mb-2">
+                            RECOVERY DESTINATION
+                        </label>
+                        <div className="p-4 bg-purple-50 border-3 border-purple-500 rounded-xl">
+                            <p className="text-xs text-gray-700 font-medium mb-2">Owner Address (Auto-filled)</p>
+                            <p className="text-black font-mono text-sm break-all">{ownerAddress || 'Not available'}</p>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-2 font-medium">Funds will be recovered to your owner address</p>
+                    </div>
+                )}
 
                 {/* Amount Input */}
                 <div>
@@ -367,17 +442,25 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 <button
                     onClick={handleTransfer}
                     disabled={isLoading}
-                    className="w-full px-6 py-4 bg-blue-400 hover:bg-blue-500 disabled:bg-gray-400 text-black font-black rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-lg border-3 border-black"
+                    className={`w-full px-6 py-4 disabled:bg-gray-400 text-black font-black rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-lg border-3 border-black ${transferMode === 'send'
+                        ? 'bg-blue-400 hover:bg-blue-500'
+                        : 'bg-purple-400 hover:bg-purple-500'
+                        }`}
                 >
                     {isLoading ? (
                         <>
                             <Loader2 className="w-5 h-5 animate-spin" />
                             PROCESSING...
                         </>
-                    ) : (
+                    ) : transferMode === 'send' ? (
                         <>
                             SEND USDC
                             <ArrowRight className="w-5 h-5" />
+                        </>
+                    ) : (
+                        <>
+                            <ArrowRight className="w-5 h-5 rotate-180" />
+                            RECOVER TO OWNER
                         </>
                     )}
                 </button>
