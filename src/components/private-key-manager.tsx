@@ -14,9 +14,11 @@ import {
 import {
     getAccountFromPrivateKey,
     deriveSmartAccountAddress,
-    getTokenBalance
+    getTokenBalance,
+    isAccountDeployed,
+    deploySmartAccount
 } from '@/lib/smart-account'
-import { Key, Trash2, Wallet, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react'
+import { Key, Trash2, Wallet, Eye, EyeOff, CheckCircle, AlertCircle, Loader2, Rocket, Copy, X, AlertTriangle } from 'lucide-react'
 import { NETWORKS, type NetworkKey } from '@/lib/network'
 
 interface PrivateKeyManagerProps {
@@ -35,6 +37,11 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
     const [error, setError] = useState<string>('')
     const [success, setSuccess] = useState<string>('')
     const [balance, setBalance] = useState<string>('0')
+    const [isDeployed, setIsDeployed] = useState<boolean | null>(null)
+    const [isDeploying, setIsDeploying] = useState(false)
+    const [deployTxHash, setDeployTxHash] = useState<string>('')
+    const [showFundingModal, setShowFundingModal] = useState(false)
+    const [fundingAddress, setFundingAddress] = useState<string>('')
 
     useEffect(() => {
         // Check if there's a stored private key
@@ -53,12 +60,13 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
         }
     }, [])
 
-    // Refresh balance when network changes
+    // Refresh balance and check deployment when network changes
     useEffect(() => {
         if (smartAccountAddress) {
             fetchBalance(smartAccountAddress as Address)
+            checkDeployment(smartAccountAddress as Address)
         }
-    }, [network])
+    }, [network, smartAccountAddress])
 
     const loadAccountInfo = async (key: string) => {
         try {
@@ -83,6 +91,16 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
             setBalance((Number(bal) / divisor).toFixed(2))
         } catch (err) {
             console.error('Error fetching balance:', err)
+        }
+    }
+
+    const checkDeployment = async (address: Address) => {
+        try {
+            const deployed = await isAccountDeployed(address, network)
+            setIsDeployed(deployed)
+        } catch (err) {
+            console.error('Error checking deployment:', err)
+            setIsDeployed(null)
         }
     }
 
@@ -172,8 +190,9 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
             // Notify other components that smart account was updated
             window.dispatchEvent(new Event('smartAccountUpdated'))
 
-            // Fetch balance
+            // Fetch balance and check deployment
             await fetchBalance(smartAccount)
+            await checkDeployment(smartAccount)
 
             setSuccess('Smart account address derived successfully!')
         } catch (err: any) {
@@ -181,6 +200,60 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const handleDeployAccount = async () => {
+        setError('')
+        setSuccess('')
+        setDeployTxHash('')
+        setIsDeploying(true)
+
+        if (!hasStoredKey || !smartAccountAddress) {
+            setError('Please derive your smart account address first')
+            setIsDeploying(false)
+            return
+        }
+
+        try {
+            const result = await deploySmartAccount(privateKey, smartAccountAddress as Address, network)
+
+            if (result.success) {
+                setSuccess('Smart account deployed successfully!')
+                setDeployTxHash(result.txHash || '')
+                setIsDeployed(true)
+
+                // Notify other components
+                window.dispatchEvent(new Event('smartAccountUpdated'))
+
+                // Refresh balance
+                await fetchBalance(smartAccountAddress as Address)
+            } else {
+                // Check if it's an AA21 error (insufficient gas)
+                if (result.error && (result.error.includes('AA21') || result.error.includes("didn't pay prefund"))) {
+                    setFundingAddress(smartAccountAddress)
+                    setShowFundingModal(true)
+                } else {
+                    setError(result.error || 'Failed to deploy smart account')
+                }
+            }
+        } catch (err: any) {
+            const errorMessage = err.message || 'Failed to deploy smart account'
+            // Check if it's an AA21 error (insufficient gas)
+            if (errorMessage.includes('AA21') || errorMessage.includes("didn't pay prefund")) {
+                setFundingAddress(smartAccountAddress)
+                setShowFundingModal(true)
+            } else {
+                setError(errorMessage)
+            }
+        } finally {
+            setIsDeploying(false)
+        }
+    }
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text)
+        setSuccess('Address copied to clipboard!')
+        setTimeout(() => setSuccess(''), 2000)
     }
 
     return (
@@ -319,6 +392,72 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                                     <p className="text-black font-mono text-sm break-all">{smartAccountAddress}</p>
                                 </div>
 
+                                {/* Deployment Status Indicator */}
+                                <div className={`p-4 rounded-xl border-3 ${isDeployed === true ? 'bg-green-100 border-green-500' : isDeployed === false ? 'bg-orange-100 border-orange-500' : 'bg-gray-100 border-gray-500'}`}>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-black font-bold mb-1">DEPLOYMENT STATUS</p>
+                                            <div className="flex items-center gap-2">
+                                                {isDeployed === true ? (
+                                                    <>
+                                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                                        <span className="text-black font-bold">DEPLOYED</span>
+                                                    </>
+                                                ) : isDeployed === false ? (
+                                                    <>
+                                                        <AlertCircle className="w-5 h-5 text-orange-600" />
+                                                        <span className="text-black font-bold">NOT DEPLOYED</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                                                        <span className="text-black font-bold">CHECKING...</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {isDeployed === false && (
+                                            <button
+                                                onClick={handleDeployAccount}
+                                                disabled={isDeploying}
+                                                className="px-4 py-2 bg-orange-400 hover:bg-orange-500 disabled:bg-gray-400 text-black font-bold rounded-lg transition-all duration-200 flex items-center gap-2 border-2 border-black"
+                                            >
+                                                {isDeploying ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        DEPLOYING...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Rocket className="w-4 h-4" />
+                                                        DEPLOY
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {isDeployed === false && (
+                                        <p className="text-xs text-gray-700 mt-2 font-medium">
+                                            ⚠️ Your account needs to be deployed on-chain before you can transfer tokens.
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Transaction Hash */}
+                                {deployTxHash && (
+                                    <div className="p-4 bg-green-100 border-3 border-green-500 rounded-xl">
+                                        <p className="text-sm text-black font-bold mb-1">DEPLOYMENT TX HASH</p>
+                                        <a
+                                            href={`${NETWORKS[network].chain.blockExplorers.default.url}/tx/${deployTxHash}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-black font-mono break-all hover:text-green-700 transition-colors underline"
+                                        >
+                                            {deployTxHash}
+                                        </a>
+                                    </div>
+                                )}
+
                                 <div className="p-4 bg-green-100 rounded-xl border-3 border-black">
                                     <p className="text-sm text-black font-bold mb-1">USDC BALANCE</p>
                                     <p className="text-2xl font-black text-black">${balance}</p>
@@ -341,6 +480,78 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                 <div className="flex items-center gap-3 p-4 bg-green-100 border-3 border-green-500 rounded-xl text-green-700">
                     <CheckCircle className="w-5 h-5 flex-shrink-0" />
                     <p className="text-sm font-bold">{success}</p>
+                </div>
+            )}
+
+            {/* Funding Modal */}
+            {showFundingModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white border-4 border-black rounded-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-200">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowFundingModal(false)}
+                            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                            <X className="w-5 h-5 text-black" />
+                        </button>
+
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 bg-orange-400 border-3 border-black rounded-full flex items-center justify-center">
+                                <AlertTriangle className="w-8 h-8 text-black" />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-2xl font-black text-black text-center mb-2">
+                            INSUFFICIENT GAS FUNDS
+                        </h3>
+
+                        {/* Message */}
+                        <p className="text-center text-gray-700 font-medium mb-4">
+                            Your smart account needs native tokens ({NETWORKS[network].chain.nativeCurrency.symbol}) to pay for deployment gas fees.
+                        </p>
+
+                        {/* Address Box */}
+                        <div className="bg-orange-50 border-3 border-orange-500 rounded-xl p-4 mb-4">
+                            <p className="text-sm font-bold text-black mb-2">FUND THIS ADDRESS:</p>
+                            <div className="bg-white border-2 border-black rounded-lg p-3 mb-3">
+                                <p className="text-black font-mono text-sm break-all">{fundingAddress}</p>
+                            </div>
+                            <button
+                                onClick={() => copyToClipboard(fundingAddress)}
+                                className="w-full px-4 py-2 bg-orange-400 hover:bg-orange-500 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-black"
+                            >
+                                <Copy className="w-4 h-4" />
+                                COPY ADDRESS
+                            </button>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-blue-50 border-3 border-blue-500 rounded-xl p-4 mb-4">
+                            <p className="text-sm font-bold text-black mb-2">INSTRUCTIONS:</p>
+                            <ol className="text-sm text-gray-700 font-medium space-y-1 list-decimal list-inside">
+                                <li>Send {NETWORKS[network].chain.nativeCurrency.symbol} to the address above</li>
+                                <li>Wait for the transaction to confirm</li>
+                                <li>Click the DEPLOY button again</li>
+                            </ol>
+                        </div>
+
+                        {/* Network Info */}
+                        <div className="text-center">
+                            <p className="text-xs text-gray-600 font-medium">
+                                Network: <span className="font-bold text-black">{NETWORKS[network].chain.name}</span>
+                            </p>
+                        </div>
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowFundingModal(false)}
+                            className="w-full mt-4 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-black font-bold rounded-xl transition-colors border-3 border-black"
+                        >
+                            CLOSE
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

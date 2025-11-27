@@ -14,9 +14,11 @@ import {
     getUserOpHash,
     formatUserOpForBundler,
     bundlerRpc,
-    getTokenBalance
+    getTokenBalance,
+    isAccountDeployed,
+    getInitCode
 } from '@/lib/smart-account'
-import { Send, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Send, ArrowRight, Loader2, CheckCircle, AlertCircle, Copy, X, AlertTriangle } from 'lucide-react'
 import { NETWORKS, NETWORK_LABELS, type NetworkKey } from '@/lib/network'
 
 const DUMMY_SIGNATURE = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c'
@@ -35,6 +37,8 @@ export function TokenTransfer({ network }: TokenTransferProps) {
     const [smartAccountAddress, setSmartAccountAddress] = useState('')
     const [balance, setBalance] = useState('0')
     const [hasPrivateKey, setHasPrivateKey] = useState(false)
+    const [showFundingModal, setShowFundingModal] = useState(false)
+    const [fundingAddress, setFundingAddress] = useState<string>('')
 
     useEffect(() => {
         const loadData = () => {
@@ -90,6 +94,12 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         }
     }
 
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text)
+        setSuccess('Address copied to clipboard!')
+        setTimeout(() => setSuccess(''), 2000)
+    }
+
     const handleTransfer = async () => {
         setError('')
         setSuccess('')
@@ -140,6 +150,16 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 transport: http(networkConfig.chain.rpcUrls.default.http[0]),
             })
 
+            // Check if account is deployed
+            const deployed = await isAccountDeployed(smartAccountAddress as Address, network)
+
+            // Generate initCode if account is not deployed
+            let initCode: `0x${string}` = '0x'
+            if (!deployed) {
+                initCode = getInitCode(networkConfig.factoryAddress, signer.address)
+                console.log('Account not deployed, including initCode for deployment')
+            }
+
             // Get nonce
             const nonce = await publicClient.readContract({
                 address: networkConfig.entryPoint,
@@ -168,23 +188,22 @@ export function TokenTransfer({ network }: TokenTransferProps) {
 
             try {
                 const gasPrices = await bundlerRpc('pimlico_getUserOperationGasPrice', [], networkConfig.bundlerUrl)
-                maxFeePerGas = BigInt(gasPrices.fast.maxFeePerGas)
-                maxPriorityFeePerGas = BigInt(gasPrices.fast.maxPriorityFeePerGas)
+                maxFeePerGas = BigInt(gasPrices.standard.maxFeePerGas)
+                maxPriorityFeePerGas = BigInt(gasPrices.standard.maxPriorityFeePerGas)
             } catch (e) {
-                console.warn('Failed to get Pimlico gas prices, falling back to chain gas price:', e)
-                const gasPrice = await publicClient.getGasPrice()
-                maxFeePerGas = gasPrice * 2n
-                maxPriorityFeePerGas = gasPrice / 2n
+                console.warn('Failed to get Pimlico gas prices, using fallback:', e)
+                maxFeePerGas = 1500000000n; // 1.5 gwei minimum
+                maxPriorityFeePerGas = 1500000000n;
             }
 
             // Build UserOperation
             let userOp = {
                 sender: smartAccountAddress,
                 nonce: nonce,
-                initCode: '0x' as `0x${string}`,
+                initCode: initCode, // Use generated initCode if not deployed
                 callData: executeCallData,
                 callGasLimit: 300000n,
-                verificationGasLimit: 300000n,
+                verificationGasLimit: deployed ? 300000n : 1000000n, // Higher for deployment
                 preVerificationGas: 500000n,
                 maxFeePerGas: maxFeePerGas,
                 maxPriorityFeePerGas: maxPriorityFeePerGas,
@@ -241,7 +260,8 @@ export function TokenTransfer({ network }: TokenTransferProps) {
 
             if (receipt) {
                 setTxHash(receipt.receipt?.transactionHash || '')
-                setSuccess(`Transfer successful! ${amount} USDC sent to ${recipient}`)
+                const deployMsg = !deployed ? ' (Account deployed and transfer completed!)' : ''
+                setSuccess(`Transfer successful! ${amount} USDC sent to ${recipient}${deployMsg}`)
 
                 // Refresh balance
                 await fetchBalance(smartAccountAddress as Address)
@@ -249,12 +269,22 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 // Reset form
                 setRecipient('')
                 setAmount('')
+
+                // Notify components to refresh deployment status
+                window.dispatchEvent(new Event('smartAccountUpdated'))
             } else {
                 setSuccess(`Transaction pending. Check explorer for UserOp: ${userOpHashResult}`)
             }
 
         } catch (err: any) {
-            setError(err.message || 'Failed to transfer tokens')
+            const errorMessage = err.message || 'Failed to transfer tokens'
+            // Check if it's an AA21 error (insufficient gas)
+            if (errorMessage.includes('AA21') || errorMessage.includes("didn't pay prefund")) {
+                setFundingAddress(smartAccountAddress)
+                setShowFundingModal(true)
+            } else {
+                setError(errorMessage)
+            }
             console.error('Transfer error:', err)
         } finally {
             setIsLoading(false)
@@ -380,6 +410,78 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 <div className="flex items-center gap-3 p-4 bg-green-100 border-3 border-green-500 rounded-xl text-green-700 mt-4">
                     <CheckCircle className="w-5 h-5 flex-shrink-0" />
                     <p className="text-sm font-bold">{success}</p>
+                </div>
+            )}
+
+            {/* Funding Modal */}
+            {showFundingModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white border-4 border-black rounded-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-200">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowFundingModal(false)}
+                            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                            <X className="w-5 h-5 text-black" />
+                        </button>
+
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 bg-orange-400 border-3 border-black rounded-full flex items-center justify-center">
+                                <AlertTriangle className="w-8 h-8 text-black" />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-2xl font-black text-black text-center mb-2">
+                            INSUFFICIENT GAS FUNDS
+                        </h3>
+
+                        {/* Message */}
+                        <p className="text-center text-gray-700 font-medium mb-4">
+                            Your smart account needs native tokens ({NETWORKS[network].chain.nativeCurrency.symbol}) to pay for transaction gas fees.
+                        </p>
+
+                        {/* Address Box */}
+                        <div className="bg-orange-50 border-3 border-orange-500 rounded-xl p-4 mb-4">
+                            <p className="text-sm font-bold text-black mb-2">FUND THIS ADDRESS:</p>
+                            <div className="bg-white border-2 border-black rounded-lg p-3 mb-3">
+                                <p className="text-black font-mono text-sm break-all">{fundingAddress}</p>
+                            </div>
+                            <button
+                                onClick={() => copyToClipboard(fundingAddress)}
+                                className="w-full px-4 py-2 bg-orange-400 hover:bg-orange-500 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-black"
+                            >
+                                <Copy className="w-4 h-4" />
+                                COPY ADDRESS
+                            </button>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-blue-50 border-3 border-blue-500 rounded-xl p-4 mb-4">
+                            <p className="text-sm font-bold text-black mb-2">INSTRUCTIONS:</p>
+                            <ol className="text-sm text-gray-700 font-medium space-y-1 list-decimal list-inside">
+                                <li>Send {NETWORKS[network].chain.nativeCurrency.symbol} to the address above</li>
+                                <li>Wait for the transaction to confirm</li>
+                                <li>Try your transfer again</li>
+                            </ol>
+                        </div>
+
+                        {/* Network Info */}
+                        <div className="text-center">
+                            <p className="text-xs text-gray-600 font-medium">
+                                Network: <span className="font-bold text-black">{NETWORKS[network].chain.name}</span>
+                            </p>
+                        </div>
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowFundingModal(false)}
+                            className="w-full mt-4 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-black font-bold rounded-xl transition-colors border-3 border-black"
+                        >
+                            CLOSE
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
