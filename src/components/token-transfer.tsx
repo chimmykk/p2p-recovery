@@ -494,16 +494,40 @@ export function TokenTransfer({ network }: TokenTransferProps) {
 
                 {/* Transaction Hash */}
                 {txHash && (
-                    <div className="p-4 bg-success-light dark:bg-success-dark/20 border border-success/30 rounded-lg">
-                        <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Transaction Hash</p>
-                        <a
-                            href={`${NETWORKS[network].chain.blockExplorers.default.url}/tx/${txHash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-neutral-900 dark:text-neutral-50 font-mono break-all hover:text-success transition-colors underline"
-                        >
-                            {txHash}
-                        </a>
+                    <div className="p-3 sm:p-4 bg-success-light dark:bg-success-dark/20 border border-success/30 rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                            <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Transaction Hash</p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => copyToClipboard(txHash)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md hover:border-success transition-colors text-xs font-medium text-neutral-700 dark:text-neutral-300"
+                                >
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Copy</span>
+                                </button>
+                                <a
+                                    href={`${NETWORKS[network].chain.blockExplorers.default.url}/tx/${txHash}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-success dark:bg-success-dark border border-success/30 rounded-md hover:bg-success-dark transition-colors text-xs font-medium text-white"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                    <span className="hidden sm:inline">View</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md p-2.5">
+                            {/* Mobile: Truncated hash */}
+                            <p className="sm:hidden text-xs text-neutral-900 dark:text-neutral-50 font-mono">
+                                {txHash.substring(0, 10)}...{txHash.substring(txHash.length - 8)}
+                            </p>
+                            {/* Desktop: Full hash */}
+                            <p className="hidden sm:block text-xs text-neutral-900 dark:text-neutral-50 font-mono break-all">
+                                {txHash}
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>

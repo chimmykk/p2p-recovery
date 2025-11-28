@@ -78,7 +78,7 @@ export default function Home() {
         {/* How to Get Started Section */}
         <div className="mb-8 sm:mb-10 md:mb-12" suppressHydrationWarning>
           <a
-            href="https://vimeo.com/1141414986?fl=pl&fe=sh"
+            href="https://youtube.com/shorts/BMWqLY5zKFc?feature=share"
             target="_blank"
             rel="noopener noreferrer"
             className="group block w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 hover:border-brand-500 dark:hover:border-brand-400 shadow-soft hover:shadow-brand transition-all"
