@@ -258,15 +258,15 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
 
 
     return (
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-5 md:space-y-6">
             {/* Private Key Input Section */}
-            <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">
-                <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft">
+                <div className="flex items-center justify-between mb-4 md:mb-5">
                     <div>
-                        <span className="px-2.5 md:px-3 py-1 bg-green-400 text-black text-xs font-bold rounded-full border-2 border-black">
-                            SETUP
+                        <span className="px-3 py-1 bg-success/10 text-success-dark dark:text-success text-xs font-medium rounded-full border border-success/20">
+                            Setup
                         </span>
-                        <h2 className="text-lg md:text-xl font-black text-black mt-2">PRIVATE KEY MANAGEMENT</h2>
+                        <h2 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mt-2">Private Key Management</h2>
                     </div>
                 </div>
 
@@ -277,11 +277,11 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                             value={privateKey}
                             onChange={(e) => setPrivateKey(e.target.value)}
                             placeholder="Enter your private key (0x...)"
-                            className="w-full px-4 py-3 bg-gray-50 border-3 border-black rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12 font-medium"
+                            className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500 pr-12"
                         />
                         <button
                             onClick={() => setShowPrivateKey(!showPrivateKey)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-gray-600 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
                         >
                             {showPrivateKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -290,27 +290,29 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                     <div className="flex gap-3">
                         <button
                             onClick={handleSavePrivateKey}
-                            className="flex-1 px-4 py-3 bg-green-400 hover:bg-green-500 text-black font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 border-3 border-black"
+                            className="flex-1 px-4 py-2.5 bg-[#8984d9] hover:bg-[#7469ce] text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                            style={{ backgroundColor: '#8984d9' }}
                         >
                             <Key className="w-4 h-4" />
-                            SAVE KEY
+                            Save Key
                         </button>
 
                         {hasStoredKey && (
                             <button
                                 onClick={handleClearPrivateKey}
-                                className="px-4 py-3 bg-red-400 hover:bg-red-500 text-black font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 border-3 border-black"
+                                className="px-4 py-2.5 bg-[#d6d6d7] hover:bg-[#c5c5c6] text-neutral-900 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                                style={{ backgroundColor: '#d6d6d7' }}
                             >
                                 <Trash2 className="w-4 h-4" />
-                                CLEAR
+                                Clear
                             </button>
                         )}
                     </div>
 
                     {hasStoredKey && (
-                        <div className="flex items-center gap-2 text-green-600 text-sm font-bold">
+                        <div className="flex items-center gap-2 text-success dark:text-success-light text-sm font-medium">
                             <CheckCircle className="w-4 h-4" />
-                            <span>KEY STORED IN BROWSER</span>
+                            <span>Key stored in browser</span>
                         </div>
                     )}
                 </div>
@@ -318,88 +320,91 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
 
             {/* Smart Account Derivation Section */}
             {hasStoredKey && (
-                <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">
-                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft">
+                    <div className="flex items-center justify-between mb-4 md:mb-5">
                         <div>
-                            <span className="px-2.5 md:px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full border-2 border-black">
-                                ACCOUNT
+                            <span className="px-3 py-1 bg-warning/10 text-warning-dark dark:text-warning text-xs font-medium rounded-full border border-warning/20">
+                                Account
                             </span>
-                            <h2 className="text-lg md:text-xl font-black text-black mt-2">SMART ACCOUNT</h2>
+                            <h2 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mt-2">Smart Account</h2>
                         </div>
                     </div>
 
-                    <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-4">
                         <div>
-                            <label className="block text-xs md:text-sm font-bold text-black mb-2">
-                                FACTORY ADDRESS
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                Factory Address
                             </label>
                             <input
                                 type="text"
                                 value={factoryAddress}
                                 onChange={(e) => setFactoryAddress(e.target.value)}
                                 placeholder="0x..."
-                                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 border-3 border-black rounded-lg md:rounded-xl text-sm md:text-base text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
+                                className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs md:text-sm font-bold text-black mb-2">
-                                FACTORY DATA (BYTES)
+                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                Factory Data (Bytes)
                             </label>
                             <input
                                 type="text"
                                 value={factoryData}
                                 onChange={(e) => setFactoryData(e.target.value)}
                                 placeholder="0x (empty for default)"
-                                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 border-3 border-black rounded-lg md:rounded-xl text-sm md:text-base text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
+                                className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                             />
-                            <p className="text-xs text-gray-600 mt-1 font-medium">Optional: Leave as 0x for default initialization</p>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5">Optional: Leave as 0x for default initialization</p>
                         </div>
 
                         <button
                             onClick={handleDeriveSmartAccount}
                             disabled={isLoading}
-                            className="w-full px-4 py-3 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-400 text-black font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 border-3 border-black"
+                            className="w-full px-4 py-2.5 disabled:opacity-50 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                            style={{ backgroundColor: isLoading ? '#d6d6d7' : '#8984d9' }}
+                            onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#7469ce')}
+                            onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#8984d9')}
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                                    DERIVING...
+                                    <div className="w-4 h-4 border-2 border-neutral-600 border-t-transparent rounded-full animate-spin" />
+                                    <span className="text-neutral-600">Deriving...</span>
                                 </>
                             ) : (
                                 <>
-                                    DERIVE ACCOUNT
+                                    Derive Account
                                 </>
                             )}
                         </button>
 
                         {smartAccountAddress && (
-                            <div className="mt-3 md:mt-4 space-y-3">
-                                <div className="p-3 md:p-4 bg-blue-100 rounded-lg md:rounded-xl border-3 border-black">
-                                    <p className="text-xs md:text-sm text-black font-bold mb-1">SMART ACCOUNT ADDRESS</p>
-                                    <p className="text-black font-mono text-xs md:text-sm break-all">{smartAccountAddress}</p>
+                            <div className="mt-4 space-y-3">
+                                <div className="p-4 bg-info-light dark:bg-info-dark/20 rounded-lg border border-info/20">
+                                    <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Smart Account Address</p>
+                                    <p className="text-neutral-900 dark:text-neutral-50 font-mono text-sm break-all">{smartAccountAddress}</p>
                                 </div>
 
                                 {/* Deployment Status Indicator */}
-                                <div className={`p-3 md:p-4 rounded-lg md:rounded-xl border-3 ${isDeployed === true ? 'bg-green-100 border-green-500' : isDeployed === false ? 'bg-orange-100 border-orange-500' : 'bg-gray-100 border-gray-500'}`}>
+                                <div className={`p-4 rounded-lg border ${isDeployed === true ? 'bg-success-light dark:bg-success-dark/20 border-success/30' : isDeployed === false ? 'bg-warning-light dark:bg-warning-dark/20 border-warning/30' : 'bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700'}`}>
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                         <div>
-                                            <p className="text-xs md:text-sm text-black font-bold mb-1">DEPLOYMENT STATUS</p>
+                                            <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Deployment Status</p>
                                             <div className="flex items-center gap-2">
                                                 {isDeployed === true ? (
                                                     <>
-                                                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
-                                                        <span className="text-sm md:text-base text-black font-bold">DEPLOYED</span>
+                                                        <CheckCircle className="w-5 h-5 text-success" />
+                                                        <span className="text-sm font-medium text-neutral-900 dark:text-neutral-50">Deployed</span>
                                                     </>
                                                 ) : isDeployed === false ? (
                                                     <>
-                                                        <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
-                                                        <span className="text-sm md:text-base text-black font-bold">NOT DEPLOYED</span>
+                                                        <AlertCircle className="w-5 h-5 text-warning" />
+                                                        <span className="text-sm font-medium text-neutral-900 dark:text-neutral-50">Not Deployed</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-gray-600 animate-spin" />
-                                                        <span className="text-sm md:text-base text-black font-bold">CHECKING...</span>
+                                                        <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
+                                                        <span className="text-sm font-medium text-neutral-900 dark:text-neutral-50">Checking...</span>
                                                     </>
                                                 )}
                                             </div>
@@ -408,49 +413,52 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                                             <button
                                                 onClick={handleDeployAccount}
                                                 disabled={isDeploying}
-                                                className="w-full sm:w-auto px-3 md:px-4 py-2 bg-orange-400 hover:bg-orange-500 disabled:bg-gray-400 text-black text-sm md:text-base font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border-2 border-black"
+                                                className="w-full sm:w-auto px-4 py-2 text-white text-sm font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                                                style={{ backgroundColor: isDeploying ? '#d6d6d7' : '#8984d9' }}
+                                                onMouseEnter={(e) => !isDeploying && (e.currentTarget.style.backgroundColor = '#7469ce')}
+                                                onMouseLeave={(e) => !isDeploying && (e.currentTarget.style.backgroundColor = '#8984d9')}
                                             >
                                                 {isDeploying ? (
                                                     <>
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                        DEPLOYING...
+                                                        <Loader2 className="w-4 h-4 animate-spin text-neutral-600" />
+                                                        <span className="text-neutral-600">Deploying...</span>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <Rocket className="w-4 h-4" />
-                                                        DEPLOY
+                                                        Deploy
                                                     </>
                                                 )}
                                             </button>
                                         )}
                                     </div>
                                     {isDeployed === false && (
-                                        <p className="text-xs text-gray-700 mt-2 font-medium">
-                                            ⚠️ Your account needs to be deployed on-chain before you can transfer tokens.
+                                        <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-2">
+                                            Your account needs to be deployed on-chain before you can transfer tokens
                                         </p>
                                     )}
                                 </div>
 
                                 {/* Transaction Hash */}
                                 {deployTxHash && (
-                                    <div className="p-3 md:p-4 bg-green-100 border-3 border-green-500 rounded-lg md:rounded-xl">
-                                        <p className="text-xs md:text-sm text-black font-bold mb-1">DEPLOYMENT TX HASH</p>
+                                    <div className="p-4 bg-success-light dark:bg-success-dark/20 border border-success/30 rounded-lg">
+                                        <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Deployment Transaction</p>
                                         <a
                                             href={`${NETWORKS[network].chain.blockExplorers.default.url}/tx/${deployTxHash}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-xs md:text-sm text-black font-mono break-all hover:text-green-700 transition-colors underline"
+                                            className="text-sm text-neutral-900 dark:text-neutral-50 font-mono break-all hover:text-success transition-colors underline"
                                         >
                                             {deployTxHash}
                                         </a>
                                     </div>
                                 )}
 
-                                <div className="p-3 md:p-4 bg-green-100 rounded-lg md:rounded-xl border-3 border-black">
-                                    <p className="text-xs md:text-sm text-black font-bold mb-1">USDC BALANCE</p>
-                                    <p className="text-xl md:text-2xl font-black text-black">${balance}</p>
-                                    <p className="text-xs text-gray-600 mt-2 font-medium">
-                                        Use the TOKEN TRANSFER panel to send or recover USDC
+                                <div className="p-4 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950/20 dark:to-brand-900/20 rounded-lg border border-brand-200 dark:border-brand-800">
+                                    <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">USDC Balance</p>
+                                    <p className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">${balance}</p>
+                                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
+                                        Use the Token Transfer panel to send or recover USDC
                                     </p>
                                 </div>
                             </div>
@@ -461,86 +469,92 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
 
             {/* Error/Success Messages */}
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-100 border-3 border-red-500 rounded-xl text-red-700">
+                <div className="flex items-center gap-3 p-4 bg-error-light dark:bg-error-dark/20 border border-error/30 rounded-lg text-error-dark dark:text-error-light">
                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="text-sm font-bold">{error}</p>
+                    <p className="text-sm font-medium">{error}</p>
                 </div>
             )}
 
             {success && (
-                <div className="flex items-center gap-3 p-4 bg-green-100 border-3 border-green-500 rounded-xl text-green-700">
+                <div className="flex items-center gap-3 p-4 bg-success-light dark:bg-success-dark/20 border border-success/30 rounded-lg text-success-dark dark:text-success-light">
                     <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="text-sm font-bold">{success}</p>
+                    <p className="text-sm font-medium">{success}</p>
                 </div>
             )}
 
             {/* Funding Modal */}
             {showFundingModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl max-w-md w-full p-4 md:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl max-w-md w-full p-6 relative shadow-strong max-h-[90vh] overflow-y-auto animate-fade-in">
                         {/* Close Button */}
                         <button
                             onClick={() => setShowFundingModal(false)}
-                            className="absolute top-3 md:top-4 right-3 md:right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="absolute top-4 right-4 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
                         >
-                            <X className="w-5 h-5 text-black" />
+                            <X className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
                         </button>
 
                         {/* Icon */}
-                        <div className="flex justify-center mb-3 md:mb-4">
-                            <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-400 border-3 border-black rounded-full flex items-center justify-center">
-                                <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-black" />
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 bg-warning/10 border border-warning/20 rounded-full flex items-center justify-center">
+                                <AlertTriangle className="w-8 h-8 text-warning" />
                             </div>
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-xl md:text-2xl font-black text-black text-center mb-2">
-                            INSUFFICIENT GAS FUNDS
+                        <h3 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50 text-center mb-2">
+                            Insufficient Gas Funds
                         </h3>
 
                         {/* Message */}
-                        <p className="text-center text-sm md:text-base text-gray-700 font-medium mb-3 md:mb-4">
+                        <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mb-5">
                             Your smart account needs native tokens ({NETWORKS[network].chain.nativeCurrency.symbol}) to pay for deployment gas fees.
                         </p>
 
                         {/* Address Box */}
-                        <div className="bg-orange-50 border-3 border-orange-500 rounded-lg md:rounded-xl p-3 md:p-4 mb-3 md:mb-4">
-                            <p className="text-xs md:text-sm font-bold text-black mb-2">FUND THIS ADDRESS:</p>
-                            <div className="bg-white border-2 border-black rounded-lg p-2.5 md:p-3 mb-3">
-                                <p className="text-black font-mono text-xs md:text-sm break-all">{fundingAddress}</p>
+                        <div className="bg-warning-light dark:bg-warning-dark/20 border border-warning/30 rounded-lg p-4 mb-4">
+                            <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Fund this address:</p>
+                            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 mb-3">
+                                <p className="text-neutral-900 dark:text-neutral-50 font-mono text-xs break-all">{fundingAddress}</p>
                             </div>
                             <button
                                 onClick={() => copyToClipboard(fundingAddress)}
-                                className="w-full px-3 md:px-4 py-2 bg-orange-400 hover:bg-orange-500 text-black text-sm md:text-base font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-black"
+                                className="w-full px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md"
+                                style={{ backgroundColor: '#8984d9' }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7469ce'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#8984d9'}
                             >
                                 <Copy className="w-4 h-4" />
-                                COPY ADDRESS
+                                Copy Address
                             </button>
                         </div>
 
                         {/* Instructions */}
-                        <div className="bg-blue-50 border-3 border-blue-500 rounded-lg md:rounded-xl p-3 md:p-4 mb-3 md:mb-4">
-                            <p className="text-xs md:text-sm font-bold text-black mb-2">INSTRUCTIONS:</p>
-                            <ol className="text-xs md:text-sm text-gray-700 font-medium space-y-1 list-decimal list-inside">
+                        <div className="bg-info-light dark:bg-info-dark/20 border border-info/30 rounded-lg p-4 mb-4">
+                            <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Instructions:</p>
+                            <ol className="text-sm text-neutral-700 dark:text-neutral-300 space-y-1.5 list-decimal list-inside">
                                 <li>Send {NETWORKS[network].chain.nativeCurrency.symbol} to the address above</li>
                                 <li>Wait for the transaction to confirm</li>
-                                <li>Click the DEPLOY button again</li>
+                                <li>Click the Deploy button again</li>
                             </ol>
                         </div>
 
                         {/* Network Info */}
-                        <div className="text-center">
-                            <p className="text-xs text-gray-600 font-medium">
-                                Network: <span className="font-bold text-black">{NETWORKS[network].chain.name}</span>
+                        <div className="text-center mb-4">
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                Network: <span className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORKS[network].chain.name}</span>
                             </p>
                         </div>
 
                         {/* Close Button */}
                         <button
                             onClick={() => setShowFundingModal(false)}
-                            className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2.5 md:py-3 bg-gray-200 hover:bg-gray-300 text-black text-sm md:text-base font-bold rounded-lg md:rounded-xl transition-colors border-3 border-black"
+                            className="w-full px-4 py-2.5 text-neutral-900 dark:text-neutral-50 text-sm font-semibold rounded-lg transition-colors"
+                            style={{ backgroundColor: '#d6d6d7' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c5c5c6'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#d6d6d7'}
                         >
-                            CLOSE
+                            Close
                         </button>
                     </div>
                 </div>

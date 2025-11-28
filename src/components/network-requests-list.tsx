@@ -58,10 +58,10 @@ export function NetworkRequestsList() {
 
   if (isLoading) {
     return (
-      <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-6 md:p-8" suppressHydrationWarning>
-        <div className="flex items-center justify-center gap-3" suppressHydrationWarning>
-          <Loader2 className="w-5 h-5 animate-spin text-black" />
-          <p className="text-sm md:text-base font-bold text-black">Loading network requests...</p>
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-6 sm:p-8 shadow-soft" suppressHydrationWarning>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3" suppressHydrationWarning>
+          <Loader2 className="w-5 h-5 animate-spin text-brand-500" />
+          <p className="text-xs sm:text-sm md:text-base font-medium text-neutral-900 dark:text-neutral-50">Loading network requests...</p>
         </div>
       </div>
     )
@@ -69,84 +69,82 @@ export function NetworkRequestsList() {
 
   if (error) {
     return (
-      <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-6 md:p-8" suppressHydrationWarning>
-        <div className="flex items-center gap-3 text-red-700" suppressHydrationWarning>
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm font-bold">{error}</p>
+      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-6 sm:p-8 shadow-soft" suppressHydrationWarning>
+        <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-error-dark dark:text-error-light" suppressHydrationWarning>
+          <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0" />
+          <p className="text-xs sm:text-sm font-medium leading-relaxed">{error}</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
-      <div className="flex items-center justify-between mb-4 md:mb-6" suppressHydrationWarning>
+    <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 shadow-soft" suppressHydrationWarning>
+      <div className="flex items-center justify-between mb-4 sm:mb-5" suppressHydrationWarning>
         <div suppressHydrationWarning>
-          <h2 className="text-lg md:text-xl font-black text-black">REQUESTED NETWORKS</h2>
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50">Requested Networks</h2>
         </div>
-        <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-black" />
+        <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-brand-500 flex-shrink-0" />
       </div>
 
-      <p className="text-xs md:text-sm text-gray-700 font-medium mb-4 md:mb-6">
+      <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-4 sm:mb-5 md:mb-6">
         See what networks the community wants next!
       </p>
 
       {requests.length === 0 ? (
-        <div className="text-center py-8 md:py-12" suppressHydrationWarning>
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-200 border-3 border-black rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4" suppressHydrationWarning>
-            <Users className="w-6 h-6 md:w-8 md:h-8 text-black" />
+        <div className="text-center py-8 sm:py-10 md:py-12" suppressHydrationWarning>
+          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" suppressHydrationWarning>
+            <Users className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400" />
           </div>
-          <p className="text-sm md:text-base text-gray-700 font-bold">No network requests yet</p>
-          <p className="text-xs md:text-sm text-gray-600 font-medium mt-1">Be the first to request a network!</p>
+          <p className="text-sm sm:text-base text-neutral-900 dark:text-neutral-50 font-medium">No network requests yet</p>
+          <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-1">Be the first to request a network!</p>
         </div>
       ) : (
-        <div className="space-y-3" suppressHydrationWarning>
+        <div className="space-y-2.5 sm:space-y-3" suppressHydrationWarning>
           {requests.map((request, index) => (
             <div
               key={`${request.networkName}-${request.chainId}`}
-              className="flex items-center justify-between p-3 md:p-4 bg-gray-50 border-3 border-black rounded-lg md:rounded-xl hover:bg-gray-100 transition-colors"
+              className="flex items-center justify-between p-3 sm:p-4 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:border-brand-500 dark:hover:border-brand-400 transition-colors touch-manipulation"
               suppressHydrationWarning
             >
-              <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0" suppressHydrationWarning>
+              <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4 flex-1 min-w-0" suppressHydrationWarning>
                 {/* Rank Badge */}
-                <div className={`w-8 h-8 md:w-10 md:h-10 border-2 md:border-3 border-black rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  index === 0 ? 'bg-yellow-400' :
-                  index === 1 ? 'bg-gray-300' :
-                  index === 2 ? 'bg-orange-300' :
-                  'bg-blue-200'
-                }`} suppressHydrationWarning>
-                  <span className="text-sm md:text-base font-black text-black">#{index + 1}</span>
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 border border-neutral-300 dark:border-neutral-600 rounded-lg flex items-center justify-center flex-shrink-0 ${index === 0 ? 'bg-yellow-400 dark:bg-yellow-500' :
+                    index === 1 ? 'bg-neutral-300 dark:bg-neutral-600' :
+                      index === 2 ? 'bg-orange-400 dark:bg-orange-500' :
+                        'bg-neutral-200 dark:bg-neutral-700'
+                  }`} suppressHydrationWarning>
+                  <span className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-neutral-50">#{index + 1}</span>
                 </div>
 
                 {/* Network Info */}
                 <div className="flex-1 min-w-0" suppressHydrationWarning>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-sm md:text-base font-black text-black truncate">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                    <h3 className="text-xs sm:text-sm md:text-base font-medium text-neutral-900 dark:text-neutral-50 truncate">
                       {request.networkName}
                     </h3>
-                    <span className={`px-2 py-0.5 text-xs font-bold rounded-full border-2 border-black flex-shrink-0 ${
-                      request.isAdded
-                        ? 'bg-green-400 text-black'
-                        : 'bg-gray-200 text-gray-700'
-                    }`}>
-                      {request.isAdded ? 'ADDED' : 'NOT ADDED'}
+                    <span className={`px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full flex-shrink-0 ${request.isAdded
+                        ? 'bg-success-light dark:bg-success-dark/20 text-success-dark dark:text-success-light border border-success/30'
+                        : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-400'
+                      }`}>
+                      {request.isAdded ? 'Added' : 'Requested'}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-600 font-medium">
+                  <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400">
                     Chain ID: {request.chainId}
                   </p>
                 </div>
               </div>
 
               {/* Vote Count */}
-              <div className="flex items-center gap-2 ml-3 flex-shrink-0" suppressHydrationWarning>
+              <div className="flex items-center gap-1.5 sm:gap-2 ml-2 sm:ml-3 flex-shrink-0" suppressHydrationWarning>
                 <div className="text-right" suppressHydrationWarning>
-                  <p className="text-lg md:text-xl font-black text-black">{request.count}</p>
-                  <p className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                  <p className="text-base sm:text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50">{request.count}</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
                     {request.count === 1 ? 'request' : 'requests'}
                   </p>
                 </div>
-                <Users className="w-4 h-4 md:w-5 md:h-5 text-black" />
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 hidden xs:block" />
               </div>
             </div>
           ))}
@@ -154,8 +152,8 @@ export function NetworkRequestsList() {
       )}
 
       {/* Refresh Info */}
-      <div className="mt-4 md:mt-6 p-3 bg-blue-50 border-2 border-blue-400 rounded-lg" suppressHydrationWarning>
-        <p className="text-xs text-gray-700 font-medium text-center">
+      <div className="mt-4 sm:mt-5 md:mt-6 p-2.5 sm:p-3 bg-info-light dark:bg-info-dark/20 border border-info/20 rounded-lg" suppressHydrationWarning>
+        <p className="text-[10px] sm:text-xs text-neutral-700 dark:text-neutral-300 text-center leading-relaxed">
           List updates automatically every hour
         </p>
       </div>
