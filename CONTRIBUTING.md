@@ -44,4 +44,4 @@ All pull requests will be reviewed for:
 - No introduction of bugs or security issues
 - Alignment with project goals
 
-Thank you for helping make P2P Recovery better! 🚀
+Thank you for helping make P2P Recovery better! 

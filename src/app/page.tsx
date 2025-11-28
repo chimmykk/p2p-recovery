@@ -51,7 +51,7 @@ export default function Home() {
                 width={160}
                 height={48}
                 className="h-10 md:h-12 w-auto"
-                style={{ width: 'auto', height: 'auto' }}
+                style={{ width: '125px', height: 'auto' }}
                 priority
               />
             </div>

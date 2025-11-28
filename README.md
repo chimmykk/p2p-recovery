@@ -60,21 +60,6 @@ Enter recipient address and amount, then submit the transaction. The application
 - Poll for receipt
 - Display transaction hash with explorer link
 
-## Network Configuration
-
-### Monad
-- Chain ID: 143
-- RPC: https://rpc3.monad.xyz
-- Explorer: https://mainnet-beta.monvision.io
-- USDC: `0x754704Bc059F8C67012fEd69BC8A327a5aafb603`
-
-### BNB Smart Chain
-- Chain ID: 56
-- RPC: https://bsc-dataseed.binance.org
-- Explorer: https://bscscan.com
-- USDC: `0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d`
-
-### And other networks will be added soon.
 
 ## Contract Addresses
 
@@ -173,7 +158,7 @@ Private keys are stored in browser localStorage and never transmitted to externa
 
 ## License
 
-ISC
+MIT
 
 ## Author
 
