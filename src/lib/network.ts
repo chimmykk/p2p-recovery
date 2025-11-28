@@ -130,9 +130,35 @@ export const optimismChain = defineChain({
     testnet: false,
 });
 
+// Define HyperLiquid Mainnet
+export const hyperliquidChain = defineChain({
+    id: 999,
+    name: 'HyperLiquid',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'HyperLiquid',
+        symbol: 'HYPE',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://hyperliquid.drpc.org'],
+        },
+        public: {
+            http: ['https://hyperliquid.drpc.org'],
+        },
+    },
+    blockExplorers: {
+        default: {
+            name: 'HyperLiquid Explorer',
+            url: 'https://explorer.hyperliquid.xyz',
+        },
+    },
+    testnet: false,
+});
+
 // Network configuration type
 export type NetworkConfig = {
-    chain: typeof monadMainnet | typeof bnbChain | typeof avalancheChain | typeof polygonChain | typeof optimismChain;
+    chain: typeof monadMainnet | typeof bnbChain | typeof avalancheChain | typeof polygonChain | typeof optimismChain | typeof hyperliquidChain;
     bundlerUrl: string;
     entryPoint: Address;
     factoryAddress: Address;
@@ -141,7 +167,7 @@ export type NetworkConfig = {
 };
 
 // Network key type
-export type NetworkKey = 'monad' | 'bnb' | 'avax' | 'polygon' | 'optimism';
+export type NetworkKey = 'monad' | 'bnb' | 'avax' | 'polygon' | 'optimism' | 'hyperliquid';
 
 // Network configurations
 export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
@@ -185,6 +211,14 @@ export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
         usdcAddress: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85' as Address,
         usdcDecimals: 6,
     },
+    hyperliquid: {
+        chain: hyperliquidChain,
+        bundlerUrl: 'https://api.pimlico.io/v2/999/rpc?apikey=pim_DgBeb1uoMpzzV4RG1Kxy6E',
+        entryPoint: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789' as Address,
+        factoryAddress: '0xdE320c2E2b4953883f61774c006f9057A55B97D1' as Address,
+        usdcAddress: '0xb88339CB7199b77E23DB6E890353E22632Ba630f' as Address,
+        usdcDecimals: 6,
+    },
 };
 
 // Network display labels
@@ -194,6 +228,7 @@ export const NETWORK_LABELS: Record<NetworkKey, string> = {
     avax: 'Avalanche',
     polygon: 'Polygon',
     optimism: 'Optimism',
+    hyperliquid: 'HyperLiquid',
 };
 
 // Network chain IDs
@@ -203,4 +238,5 @@ export const NETWORK_CHAIN_IDS: Record<NetworkKey, number> = {
     avax: 43114,
     polygon: 137,
     optimism: 10,
+    hyperliquid: 999,
 };

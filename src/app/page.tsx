@@ -161,10 +161,17 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => handleNetworkChange('optimism')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${selectedNetwork === 'optimism' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'optimism' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
                 >
                   <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.optimism}</div>
                   <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.optimism}</div>
+                </button>
+                <button
+                  onClick={() => handleNetworkChange('hyperliquid')}
+                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${selectedNetwork === 'hyperliquid' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                >
+                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.hyperliquid}</div>
+                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.hyperliquid}</div>
                 </button>
               </div>
             )}
@@ -244,10 +251,17 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => handleNetworkChange('optimism')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${selectedNetwork === 'optimism' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'optimism' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
                   >
                     <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.optimism}</div>
                     <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.optimism}</div>
+                  </button>
+                  <button
+                    onClick={() => handleNetworkChange('hyperliquid')}
+                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${selectedNetwork === 'hyperliquid' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                  >
+                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.hyperliquid}</div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.hyperliquid}</div>
                   </button>
                 </div>
               )}
