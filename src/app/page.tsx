@@ -39,78 +39,78 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 via-blue-50 to-green-100" suppressHydrationWarning>
       {/* Navigation Bar */}
-      <nav className="bg-white border-b-4 border-black">
-        <div className="max-w-7xl mx-auto px-6 py-4" suppressHydrationWarning>
+      <nav className="bg-white border-b-3 md:border-b-4 border-black">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4" suppressHydrationWarning>
           <div className="flex items-center justify-between" suppressHydrationWarning>
             {/* Logo */}
             <div className="flex items-center gap-2" suppressHydrationWarning>
-              <h1 className="text-3xl font-black tracking-tight text-black">P2P RECOVERY</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-black">P2P RECOVERY</h1>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12" suppressHydrationWarning>
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-12" suppressHydrationWarning>
         {/* Page Header */}
-        <div className="mb-8" suppressHydrationWarning>
-          <div className="flex items-center gap-3 mb-3">
-            <h2 className="text-5xl font-black text-black">
+        <div className="mb-6 md:mb-8" suppressHydrationWarning>
+          <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-black">
               <span className="text-blue-600">TOKEN RECOVERY</span> MANAGEMENT
             </h2>
-            <span className="px-4 py-1.5 bg-green-400 text-black text-xs font-bold rounded-full border-2 border-black">
+            <span className="px-3 md:px-4 py-1 md:py-1.5 bg-green-400 text-black text-xs font-bold rounded-full border-2 border-black">
               SECURE
             </span>
           </div>
-          <p className="text-lg text-gray-700 font-medium">
+          <p className="text-sm md:text-base lg:text-lg text-gray-700 font-medium">
             Recover stuck funds from Smart Accounts
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8" suppressHydrationWarning>
-          <div className="bg-green-400 border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-            <div className="text-sm font-bold text-black mb-1">CURRENT NETWORK</div>
-            <div className="text-3xl font-black text-black">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8" suppressHydrationWarning>
+          <div className="bg-green-400 border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+            <div className="text-xs md:text-sm font-bold text-black mb-1">CURRENT NETWORK</div>
+            <div className="text-xl md:text-2xl lg:text-3xl font-black text-black">
               {mounted ? NETWORK_LABELS[selectedNetwork] : 'Loading...'}
             </div>
           </div>
 
-          <div className="bg-yellow-400 border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-            <div className="text-sm font-bold text-black mb-1">CHAIN ID</div>
-            <div className="text-3xl font-black text-black">
+          <div className="bg-yellow-400 border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+            <div className="text-xs md:text-sm font-bold text-black mb-1">CHAIN ID</div>
+            <div className="text-xl md:text-2xl lg:text-3xl font-black text-black">
               {mounted ? NETWORK_CHAIN_IDS[selectedNetwork] : '--'}
             </div>
           </div>
 
-          <div className="bg-blue-400 border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-            <div className="text-sm font-bold text-black mb-1">ACCOUNT TYPE</div>
-            <div className="text-3xl font-black text-black">ERC-4337</div>
+          <div className="bg-blue-400 border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+            <div className="text-xs md:text-sm font-bold text-black mb-1">ACCOUNT TYPE</div>
+            <div className="text-xl md:text-2xl lg:text-3xl font-black text-black">ERC-4337</div>
           </div>
         </div>
 
         {/* Main Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-8" suppressHydrationWarning>
+        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8" suppressHydrationWarning>
           {/* Private Key Management */}
           <div suppressHydrationWarning>
             <PrivateKeyManager network={selectedNetwork} />
           </div>
 
           {/* Token Transfer */}
-          <div className="space-y-6" suppressHydrationWarning>
+          <div className="space-y-4 md:space-y-6" suppressHydrationWarning>
             {/* Network Selector */}
             {mounted && (
-              <div className="relative network-selector bg-white border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-                <div className="flex items-center justify-between mb-4">
+              <div className="relative network-selector bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+                <div className="flex items-center justify-between mb-3 md:mb-4">
                   <div>
-                    <span className="px-3 py-1 bg-purple-400 text-black text-xs font-bold rounded-full border-2 border-black">
+                    <span className="px-2.5 md:px-3 py-1 bg-purple-400 text-black text-xs font-bold rounded-full border-2 border-black">
                       NETWORK
                     </span>
-                    <h3 className="text-xl font-black text-black mt-2">SWITCH NETWORK</h3>
+                    <h3 className="text-lg md:text-xl font-black text-black mt-2">SWITCH NETWORK</h3>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-700 font-medium mb-4">
+                <p className="text-xs md:text-sm text-gray-700 font-medium mb-3 md:mb-4">
                   Select your blockchain network
                 </p>
 
@@ -170,33 +170,33 @@ export default function Home() {
         </div>
 
         {/* Info Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mt-12" suppressHydrationWarning>
-          <div className="bg-white border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-            <div className="w-12 h-12 bg-blue-400 border-3 border-black rounded-xl flex items-center justify-center mb-4">
-              <span className="text-2xl font-black text-black">S</span>
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-12" suppressHydrationWarning>
+          <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-400 border-2 md:border-3 border-black rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4">
+              <span className="text-xl md:text-2xl font-black text-black">S</span>
             </div>
-            <h3 className="text-lg font-black text-black mb-2">SECURE STORAGE</h3>
-            <p className="text-gray-700 text-sm font-medium">
+            <h3 className="text-base md:text-lg font-black text-black mb-2">SECURE STORAGE</h3>
+            <p className="text-gray-700 text-xs md:text-sm font-medium">
               Your private key is stored locally in your browser, never on any server.
             </p>
           </div>
 
-          <div className="bg-white border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-            <div className="w-12 h-12 bg-purple-400 border-3 border-black rounded-xl flex items-center justify-center mb-4">
-              <span className="text-2xl font-black text-black">A</span>
+          <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-400 border-2 md:border-3 border-black rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4">
+              <span className="text-xl md:text-2xl font-black text-black">A</span>
             </div>
-            <h3 className="text-lg font-black text-black mb-2">SMART ACCOUNTS</h3>
-            <p className="text-gray-700 text-sm font-medium">
+            <h3 className="text-base md:text-lg font-black text-black mb-2">SMART ACCOUNTS</h3>
+            <p className="text-gray-700 text-xs md:text-sm font-medium">
               Interact with smart accounts.
             </p>
           </div>
 
-          <div className="bg-white border-4 border-black rounded-2xl p-6" suppressHydrationWarning>
-            <div className="w-12 h-12 bg-green-400 border-3 border-black rounded-xl flex items-center justify-center mb-4">
-              <span className="text-2xl font-black text-black">M</span>
+          <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-400 border-2 md:border-3 border-black rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4">
+              <span className="text-xl md:text-2xl font-black text-black">M</span>
             </div>
-            <h3 className="text-lg font-black text-black mb-2">MULTI-CHAIN</h3>
-            <p className="text-gray-700 text-sm font-medium">
+            <h3 className="text-base md:text-lg font-black text-black mb-2">MULTI-CHAIN</h3>
+            <p className="text-gray-700 text-xs md:text-sm font-medium">
               Support multi chain.
             </p>
           </div>
@@ -204,11 +204,11 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-black border-t-4 border-black mt-20">
-        <div className="max-w-7xl mx-auto px-6 py-8" suppressHydrationWarning>
+      <footer className="bg-black border-t-3 md:border-t-4 border-black mt-12 md:mt-20">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8" suppressHydrationWarning>
           <div className="text-center" suppressHydrationWarning>
-            <p className="text-white font-bold">P2P RECOVERY</p>
-            <p className="text-gray-400 text-sm mt-2 font-medium">
+            <p className="text-white font-bold text-sm md:text-base">P2P RECOVERY</p>
+            <p className="text-gray-400 text-xs md:text-sm mt-2 font-medium">
               built by{' '}
               <a
                 href="https://x.com/rilso_y"

@@ -258,15 +258,15 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
 
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             {/* Private Key Input Section */}
-            <div className="bg-white border-4 border-black rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
+            <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
                     <div>
-                        <span className="px-3 py-1 bg-green-400 text-black text-xs font-bold rounded-full border-2 border-black">
+                        <span className="px-2.5 md:px-3 py-1 bg-green-400 text-black text-xs font-bold rounded-full border-2 border-black">
                             SETUP
                         </span>
-                        <h2 className="text-xl font-black text-black mt-2">PRIVATE KEY MANAGEMENT</h2>
+                        <h2 className="text-lg md:text-xl font-black text-black mt-2">PRIVATE KEY MANAGEMENT</h2>
                     </div>
                 </div>
 
@@ -318,32 +318,32 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
 
             {/* Owner Address Display */}
             {ownerAddress && (
-                <div className="bg-white border-4 border-black rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-blue-400 border-3 border-black rounded-lg flex items-center justify-center">
-                            <Wallet className="w-5 h-5 text-black" />
+                <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">
+                    <div className="flex items-center gap-2 md:gap-3 mb-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-400 border-2 md:border-3 border-black rounded-lg flex items-center justify-center">
+                            <Wallet className="w-4 h-4 md:w-5 md:h-5 text-black" />
                         </div>
-                        <h3 className="text-lg font-black text-black">OWNER ADDRESS</h3>
+                        <h3 className="text-base md:text-lg font-black text-black">OWNER ADDRESS</h3>
                     </div>
-                    <p className="text-black font-mono text-sm break-all bg-gray-100 p-3 rounded-lg border-2 border-black">{ownerAddress}</p>
+                    <p className="text-black font-mono text-xs md:text-sm break-all bg-gray-100 p-2.5 md:p-3 rounded-lg border-2 border-black">{ownerAddress}</p>
                 </div>
             )}
 
             {/* Smart Account Derivation Section */}
             {hasStoredKey && (
-                <div className="bg-white border-4 border-black rounded-2xl p-6">
-                    <div className="flex items-center justify-between mb-4">
+                <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
                         <div>
-                            <span className="px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full border-2 border-black">
+                            <span className="px-2.5 md:px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full border-2 border-black">
                                 ACCOUNT
                             </span>
-                            <h2 className="text-xl font-black text-black mt-2">SMART ACCOUNT</h2>
+                            <h2 className="text-lg md:text-xl font-black text-black mt-2">SMART ACCOUNT</h2>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                         <div>
-                            <label className="block text-sm font-bold text-black mb-2">
+                            <label className="block text-xs md:text-sm font-bold text-black mb-2">
                                 FACTORY ADDRESS
                             </label>
                             <input
@@ -351,12 +351,12 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                                 value={factoryAddress}
                                 onChange={(e) => setFactoryAddress(e.target.value)}
                                 placeholder="0x..."
-                                className="w-full px-4 py-3 bg-gray-50 border-3 border-black rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
+                                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 border-3 border-black rounded-lg md:rounded-xl text-sm md:text-base text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-black mb-2">
+                            <label className="block text-xs md:text-sm font-bold text-black mb-2">
                                 FACTORY DATA (BYTES)
                             </label>
                             <input
@@ -364,7 +364,7 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                                 value={factoryData}
                                 onChange={(e) => setFactoryData(e.target.value)}
                                 placeholder="0x (empty for default)"
-                                className="w-full px-4 py-3 bg-gray-50 border-3 border-black rounded-xl text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
+                                className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-gray-50 border-3 border-black rounded-lg md:rounded-xl text-sm md:text-base text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-medium"
                             />
                             <p className="text-xs text-gray-600 mt-1 font-medium">Optional: Leave as 0x for default initialization</p>
                         </div>
@@ -387,32 +387,32 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                         </button>
 
                         {smartAccountAddress && (
-                            <div className="mt-4 space-y-3">
-                                <div className="p-4 bg-blue-100 rounded-xl border-3 border-black">
-                                    <p className="text-sm text-black font-bold mb-1">SMART ACCOUNT ADDRESS</p>
-                                    <p className="text-black font-mono text-sm break-all">{smartAccountAddress}</p>
+                            <div className="mt-3 md:mt-4 space-y-3">
+                                <div className="p-3 md:p-4 bg-blue-100 rounded-lg md:rounded-xl border-3 border-black">
+                                    <p className="text-xs md:text-sm text-black font-bold mb-1">SMART ACCOUNT ADDRESS</p>
+                                    <p className="text-black font-mono text-xs md:text-sm break-all">{smartAccountAddress}</p>
                                 </div>
 
                                 {/* Deployment Status Indicator */}
-                                <div className={`p-4 rounded-xl border-3 ${isDeployed === true ? 'bg-green-100 border-green-500' : isDeployed === false ? 'bg-orange-100 border-orange-500' : 'bg-gray-100 border-gray-500'}`}>
-                                    <div className="flex items-center justify-between">
+                                <div className={`p-3 md:p-4 rounded-lg md:rounded-xl border-3 ${isDeployed === true ? 'bg-green-100 border-green-500' : isDeployed === false ? 'bg-orange-100 border-orange-500' : 'bg-gray-100 border-gray-500'}`}>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                         <div>
-                                            <p className="text-sm text-black font-bold mb-1">DEPLOYMENT STATUS</p>
+                                            <p className="text-xs md:text-sm text-black font-bold mb-1">DEPLOYMENT STATUS</p>
                                             <div className="flex items-center gap-2">
                                                 {isDeployed === true ? (
                                                     <>
-                                                        <CheckCircle className="w-5 h-5 text-green-600" />
-                                                        <span className="text-black font-bold">DEPLOYED</span>
+                                                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+                                                        <span className="text-sm md:text-base text-black font-bold">DEPLOYED</span>
                                                     </>
                                                 ) : isDeployed === false ? (
                                                     <>
-                                                        <AlertCircle className="w-5 h-5 text-orange-600" />
-                                                        <span className="text-black font-bold">NOT DEPLOYED</span>
+                                                        <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+                                                        <span className="text-sm md:text-base text-black font-bold">NOT DEPLOYED</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
-                                                        <span className="text-black font-bold">CHECKING...</span>
+                                                        <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-gray-600 animate-spin" />
+                                                        <span className="text-sm md:text-base text-black font-bold">CHECKING...</span>
                                                     </>
                                                 )}
                                             </div>
@@ -421,7 +421,7 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                                             <button
                                                 onClick={handleDeployAccount}
                                                 disabled={isDeploying}
-                                                className="px-4 py-2 bg-orange-400 hover:bg-orange-500 disabled:bg-gray-400 text-black font-bold rounded-lg transition-all duration-200 flex items-center gap-2 border-2 border-black"
+                                                className="w-full sm:w-auto px-3 md:px-4 py-2 bg-orange-400 hover:bg-orange-500 disabled:bg-gray-400 text-black text-sm md:text-base font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border-2 border-black"
                                             >
                                                 {isDeploying ? (
                                                     <>
@@ -446,22 +446,22 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
 
                                 {/* Transaction Hash */}
                                 {deployTxHash && (
-                                    <div className="p-4 bg-green-100 border-3 border-green-500 rounded-xl">
-                                        <p className="text-sm text-black font-bold mb-1">DEPLOYMENT TX HASH</p>
+                                    <div className="p-3 md:p-4 bg-green-100 border-3 border-green-500 rounded-lg md:rounded-xl">
+                                        <p className="text-xs md:text-sm text-black font-bold mb-1">DEPLOYMENT TX HASH</p>
                                         <a
                                             href={`${NETWORKS[network].chain.blockExplorers.default.url}/tx/${deployTxHash}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-sm text-black font-mono break-all hover:text-green-700 transition-colors underline"
+                                            className="text-xs md:text-sm text-black font-mono break-all hover:text-green-700 transition-colors underline"
                                         >
                                             {deployTxHash}
                                         </a>
                                     </div>
                                 )}
 
-                                <div className="p-4 bg-green-100 rounded-xl border-3 border-black">
-                                    <p className="text-sm text-black font-bold mb-1">USDC BALANCE</p>
-                                    <p className="text-2xl font-black text-black">${balance}</p>
+                                <div className="p-3 md:p-4 bg-green-100 rounded-lg md:rounded-xl border-3 border-black">
+                                    <p className="text-xs md:text-sm text-black font-bold mb-1">USDC BALANCE</p>
+                                    <p className="text-xl md:text-2xl font-black text-black">${balance}</p>
                                     <p className="text-xs text-gray-600 mt-2 font-medium">
                                         Use the TOKEN TRANSFER panel to send or recover USDC
                                     </p>
@@ -490,41 +490,41 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
             {/* Funding Modal */}
             {showFundingModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white border-4 border-black rounded-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl max-w-md w-full p-4 md:p-6 relative animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
                         {/* Close Button */}
                         <button
                             onClick={() => setShowFundingModal(false)}
-                            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="absolute top-3 md:top-4 right-3 md:right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
                         >
                             <X className="w-5 h-5 text-black" />
                         </button>
 
                         {/* Icon */}
-                        <div className="flex justify-center mb-4">
-                            <div className="w-16 h-16 bg-orange-400 border-3 border-black rounded-full flex items-center justify-center">
-                                <AlertTriangle className="w-8 h-8 text-black" />
+                        <div className="flex justify-center mb-3 md:mb-4">
+                            <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-400 border-3 border-black rounded-full flex items-center justify-center">
+                                <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-black" />
                             </div>
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-2xl font-black text-black text-center mb-2">
+                        <h3 className="text-xl md:text-2xl font-black text-black text-center mb-2">
                             INSUFFICIENT GAS FUNDS
                         </h3>
 
                         {/* Message */}
-                        <p className="text-center text-gray-700 font-medium mb-4">
+                        <p className="text-center text-sm md:text-base text-gray-700 font-medium mb-3 md:mb-4">
                             Your smart account needs native tokens ({NETWORKS[network].chain.nativeCurrency.symbol}) to pay for deployment gas fees.
                         </p>
 
                         {/* Address Box */}
-                        <div className="bg-orange-50 border-3 border-orange-500 rounded-xl p-4 mb-4">
-                            <p className="text-sm font-bold text-black mb-2">FUND THIS ADDRESS:</p>
-                            <div className="bg-white border-2 border-black rounded-lg p-3 mb-3">
-                                <p className="text-black font-mono text-sm break-all">{fundingAddress}</p>
+                        <div className="bg-orange-50 border-3 border-orange-500 rounded-lg md:rounded-xl p-3 md:p-4 mb-3 md:mb-4">
+                            <p className="text-xs md:text-sm font-bold text-black mb-2">FUND THIS ADDRESS:</p>
+                            <div className="bg-white border-2 border-black rounded-lg p-2.5 md:p-3 mb-3">
+                                <p className="text-black font-mono text-xs md:text-sm break-all">{fundingAddress}</p>
                             </div>
                             <button
                                 onClick={() => copyToClipboard(fundingAddress)}
-                                className="w-full px-4 py-2 bg-orange-400 hover:bg-orange-500 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-black"
+                                className="w-full px-3 md:px-4 py-2 bg-orange-400 hover:bg-orange-500 text-black text-sm md:text-base font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border-2 border-black"
                             >
                                 <Copy className="w-4 h-4" />
                                 COPY ADDRESS
@@ -532,9 +532,9 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                         </div>
 
                         {/* Instructions */}
-                        <div className="bg-blue-50 border-3 border-blue-500 rounded-xl p-4 mb-4">
-                            <p className="text-sm font-bold text-black mb-2">INSTRUCTIONS:</p>
-                            <ol className="text-sm text-gray-700 font-medium space-y-1 list-decimal list-inside">
+                        <div className="bg-blue-50 border-3 border-blue-500 rounded-lg md:rounded-xl p-3 md:p-4 mb-3 md:mb-4">
+                            <p className="text-xs md:text-sm font-bold text-black mb-2">INSTRUCTIONS:</p>
+                            <ol className="text-xs md:text-sm text-gray-700 font-medium space-y-1 list-decimal list-inside">
                                 <li>Send {NETWORKS[network].chain.nativeCurrency.symbol} to the address above</li>
                                 <li>Wait for the transaction to confirm</li>
                                 <li>Click the DEPLOY button again</li>
@@ -551,7 +551,7 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                         {/* Close Button */}
                         <button
                             onClick={() => setShowFundingModal(false)}
-                            className="w-full mt-4 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-black font-bold rounded-xl transition-colors border-3 border-black"
+                            className="w-full mt-3 md:mt-4 px-3 md:px-4 py-2.5 md:py-3 bg-gray-200 hover:bg-gray-300 text-black text-sm md:text-base font-bold rounded-lg md:rounded-xl transition-colors border-3 border-black"
                         >
                             CLOSE
                         </button>
