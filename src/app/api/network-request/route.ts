@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Get existing data
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:C`,
+      range: `${SHEET_NAME}!A:D`,
     })
 
     const rows = response.data.values || []
@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
         range: `${SHEET_NAME}!A1`,
         valueInputOption: 'RAW',
         requestBody: {
-          values: [['Network Name', 'Chain ID', 'Count']],
+          values: [['Network Name', 'Chain ID', 'Count', 'Added']],
         },
       })
-      rows.push(['Network Name', 'Chain ID', 'Count'])
+      rows.push(['Network Name', 'Chain ID', 'Count', 'Added'])
     }
 
     // Find duplicate (case-insensitive)
@@ -100,10 +100,10 @@ export async function POST(request: NextRequest) {
       // Add new row
       await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A:C`,
+        range: `${SHEET_NAME}!A:D`,
         valueInputOption: 'RAW',
         requestBody: {
-          values: [[networkName, chainId, 1]],
+          values: [[networkName, chainId, 1, '']],
         },
       })
 
@@ -129,7 +129,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:C`,
+      range: `${SHEET_NAME}!A:D`,
     })
 
     const rows = response.data.values || []
@@ -139,6 +139,7 @@ export async function GET() {
       networkName: row[0] || '',
       chainId: row[1] || '',
       count: parseInt(row[2] || '1'),
+      isAdded: row[3]?.toUpperCase() === 'D',
     }))
 
     return NextResponse.json({ data })

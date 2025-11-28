@@ -284,39 +284,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Info Cards */}
-        <div className="grid md:grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-12" suppressHydrationWarning>
-          <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-400 border-2 md:border-3 border-black rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4">
-              <span className="text-xl md:text-2xl font-black text-black">S</span>
-            </div>
-            <h3 className="text-base md:text-lg font-black text-black mb-2">SECURE STORAGE</h3>
-            <p className="text-gray-700 text-xs md:text-sm font-medium">
-              Your private key is stored locally in your browser, never on any server.
-            </p>
-          </div>
-
-          <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-400 border-2 md:border-3 border-black rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4">
-              <span className="text-xl md:text-2xl font-black text-black">A</span>
-            </div>
-            <h3 className="text-base md:text-lg font-black text-black mb-2">SMART ACCOUNTS</h3>
-            <p className="text-gray-700 text-xs md:text-sm font-medium">
-              Interact with smart accounts.
-            </p>
-          </div>
-
-          <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6" suppressHydrationWarning>
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-400 border-2 md:border-3 border-black rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4">
-              <span className="text-xl md:text-2xl font-black text-black">M</span>
-            </div>
-            <h3 className="text-base md:text-lg font-black text-black mb-2">MULTI-CHAIN</h3>
-            <p className="text-gray-700 text-xs md:text-sm font-medium">
-              Support multi chain.
-            </p>
-          </div>
-        </div>
-
         {/* Network Requests Section */}
         <div className="mt-8 md:mt-12" suppressHydrationWarning>
           <div className="mb-6 text-center" suppressHydrationWarning>
@@ -338,7 +305,15 @@ export default function Home() {
           <div className="text-center" suppressHydrationWarning>
             <p className="text-white font-bold text-sm md:text-base">P2P RECOVERY</p>
             <p className="text-gray-400 text-xs md:text-sm mt-2 font-medium">
-              Built by P2P.me Community
+              Built by{' '}
+              <a
+                href="https://github.com/chimmykk/p2p-recovery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors underline font-bold"
+              >
+                P2P.me Community
+              </a>
             </p>
           </div>
         </div>

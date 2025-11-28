@@ -7,6 +7,7 @@ interface NetworkRequest {
   networkName: string
   chainId: string
   count: number
+  isAdded: boolean
 }
 
 export function NetworkRequestsList() {
@@ -119,9 +120,18 @@ export function NetworkRequestsList() {
 
                 {/* Network Info */}
                 <div className="flex-1 min-w-0" suppressHydrationWarning>
-                  <h3 className="text-sm md:text-base font-black text-black truncate">
-                    {request.networkName}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm md:text-base font-black text-black truncate">
+                      {request.networkName}
+                    </h3>
+                    <span className={`px-2 py-0.5 text-xs font-bold rounded-full border-2 border-black flex-shrink-0 ${
+                      request.isAdded
+                        ? 'bg-green-400 text-black'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}>
+                      {request.isAdded ? 'ADDED' : 'NOT ADDED'}
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-600 font-medium">
                     Chain ID: {request.chainId}
                   </p>
