@@ -240,3 +240,10 @@ export const NETWORK_CHAIN_IDS: Record<NetworkKey, number> = {
     optimism: 10,
     hyperliquid: 999,
 };
+
+// Helper to get all networks sorted alphabetically by label
+export function getNetworksSortedByLabel(): NetworkKey[] {
+    return (Object.keys(NETWORK_LABELS) as NetworkKey[]).sort((a, b) =>
+        NETWORK_LABELS[a].localeCompare(NETWORK_LABELS[b])
+    );
+}

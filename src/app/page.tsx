@@ -8,7 +8,7 @@ import { NetworkRequestForm } from '@/components/network-request-form'
 import { NetworkRequestsList } from '@/components/network-requests-list'
 import { ChevronDown, Search } from 'lucide-react'
 import { saveSelectedNetwork, getSelectedNetwork } from '@/lib/storage'
-import { NETWORK_LABELS, NETWORK_CHAIN_IDS, type NetworkKey } from '@/lib/network'
+import { NETWORK_LABELS, NETWORK_CHAIN_IDS, getNetworksSortedByLabel, type NetworkKey } from '@/lib/network'
 
 export default function Home() {
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkKey>('monad')
@@ -131,48 +131,17 @@ export default function Home() {
             {/* Dropdown */}
             {showNetworkDropdown && (
               <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium" suppressHydrationWarning>
-                <button
-                  onClick={() => handleNetworkChange('monad')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'monad' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.monad}</div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.monad}</div>
-                </button>
-                <button
-                  onClick={() => handleNetworkChange('bnb')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'bnb' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.bnb}</div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.bnb}</div>
-                </button>
-                <button
-                  onClick={() => handleNetworkChange('avax')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'avax' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.avax}</div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.avax}</div>
-                </button>
-                <button
-                  onClick={() => handleNetworkChange('polygon')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'polygon' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.polygon}</div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.polygon}</div>
-                </button>
-                <button
-                  onClick={() => handleNetworkChange('optimism')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'optimism' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.optimism}</div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.optimism}</div>
-                </button>
-                <button
-                  onClick={() => handleNetworkChange('hyperliquid')}
-                  className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${selectedNetwork === 'hyperliquid' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                >
-                  <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.hyperliquid}</div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.hyperliquid}</div>
-                </button>
+                {getNetworksSortedByLabel().map((networkKey, index, array) => (
+                  <button
+                    key={networkKey}
+                    onClick={() => handleNetworkChange(networkKey)}
+                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${index < array.length - 1 ? 'border-b border-neutral-200 dark:border-neutral-700' : ''
+                      } ${selectedNetwork === networkKey ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                  >
+                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS[networkKey]}</div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS[networkKey]}</div>
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -221,48 +190,17 @@ export default function Home() {
               {/* Dropdown */}
               {showNetworkDropdown && (
                 <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium" suppressHydrationWarning>
-                  <button
-                    onClick={() => handleNetworkChange('monad')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'monad' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                  >
-                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.monad}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.monad}</div>
-                  </button>
-                  <button
-                    onClick={() => handleNetworkChange('bnb')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'bnb' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                  >
-                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.bnb}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.bnb}</div>
-                  </button>
-                  <button
-                    onClick={() => handleNetworkChange('avax')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'avax' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                  >
-                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.avax}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.avax}</div>
-                  </button>
-                  <button
-                    onClick={() => handleNetworkChange('polygon')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'polygon' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                  >
-                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.polygon}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.polygon}</div>
-                  </button>
-                  <button
-                    onClick={() => handleNetworkChange('optimism')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-200 dark:border-neutral-700 ${selectedNetwork === 'optimism' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                  >
-                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.optimism}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.optimism}</div>
-                  </button>
-                  <button
-                    onClick={() => handleNetworkChange('hyperliquid')}
-                    className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${selectedNetwork === 'hyperliquid' ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                  >
-                    <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS.hyperliquid}</div>
-                    <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS.hyperliquid}</div>
-                  </button>
+                  {getNetworksSortedByLabel().map((networkKey, index, array) => (
+                    <button
+                      key={networkKey}
+                      onClick={() => handleNetworkChange(networkKey)}
+                      className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${index < array.length - 1 ? 'border-b border-neutral-200 dark:border-neutral-700' : ''
+                        } ${selectedNetwork === networkKey ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                    >
+                      <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS[networkKey]}</div>
+                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS[networkKey]}</div>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
