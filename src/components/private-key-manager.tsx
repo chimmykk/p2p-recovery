@@ -316,19 +316,6 @@ export function PrivateKeyManager({ network }: PrivateKeyManagerProps) {
                 </div>
             </div>
 
-            {/* Owner Address Display */}
-            {ownerAddress && (
-                <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">
-                    <div className="flex items-center gap-2 md:gap-3 mb-3">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-400 border-2 md:border-3 border-black rounded-lg flex items-center justify-center">
-                            <Wallet className="w-4 h-4 md:w-5 md:h-5 text-black" />
-                        </div>
-                        <h3 className="text-base md:text-lg font-black text-black">OWNER ADDRESS</h3>
-                    </div>
-                    <p className="text-black font-mono text-xs md:text-sm break-all bg-gray-100 p-2.5 md:p-3 rounded-lg border-2 border-black">{ownerAddress}</p>
-                </div>
-            )}
-
             {/* Smart Account Derivation Section */}
             {hasStoredKey && (
                 <div className="bg-white border-3 md:border-4 border-black rounded-xl md:rounded-2xl p-4 md:p-6">

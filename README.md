@@ -1,6 +1,6 @@
 # P2P Recovery
 
-A browser-based ERC-4337 smart account management platform for USDC token transfers on Monad and BNB Smart Chain networks.
+ERC-4337 smart account management platform for USDC token transfers on multiple networks.
 
 ## Overview
 
@@ -11,7 +11,7 @@ This application provides a simple interface for managing private keys, deriving
 - Private key management with browser-based storage
 - ERC-4337 smart account address derivation
 - USDC token transfers via UserOperation flow
-- Multi-chain support (Monad, BNB Smart Chain)
+- Multi-chain support (multiple networks)
 - Real-time balance checking
 - Transaction status tracking with explorer integration
 

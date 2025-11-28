@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "P2P Recovery - Secure Token Management",
   description: "Secure token management platform powered by ERC-4337 smart accounts on Monad network",
+  icons: {
+    icon: '/logo.ico',
+  },
 };
 
 export default function RootLayout({
@@ -29,9 +32,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Providers>
-          {children}
-        </Providers>
+        <div suppressHydrationWarning>
+          <Providers>
+            {children}
+          </Providers>
+        </div>
       </body>
     </html>
   );
