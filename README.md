@@ -1,6 +1,6 @@
 # P2P Recovery
 
-ERC-4337 smart account management platform for USDC token transfers on multiple networks.
+P2P.ME recovery platform to recover stuck USDC tokens on multiple networks.
 
 ## Overview
 
@@ -74,6 +74,8 @@ Enter recipient address and amount, then submit the transaction. The application
 - Explorer: https://bscscan.com
 - USDC: `0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d`
 
+### And other networks will be added soon.
+
 ## Contract Addresses
 
 ```
@@ -86,17 +88,21 @@ Factory: 0xdE320c2E2b4953883f61774c006f9057A55B97D1
 ```
 src/
 ├── app/
+│   ├── api/
+│   │   └── network-request/
+│   │       └── route.ts
 │   ├── layout.tsx
 │   ├── page.tsx
 │   └── globals.css
 ├── components/
 │   ├── private-key-manager.tsx
 │   ├── token-transfer.tsx
-│   └── theme-provider.tsx
+│   ├── network-request-form.tsx
+│   └── network-requests-list.tsx
 └── lib/
-    ├── providers.tsx
     ├── smart-account.ts
-    └── storage.ts
+    ├── storage.ts
+    └── network.ts
 ```
 
 ## Transaction Flow
@@ -149,28 +155,14 @@ getTokenBalance(token: Address, account: Address, network: string): Promise<bigi
 
 ### Adding Networks or Tokens
 
-We welcome community contributions to expand network and token support. To request a new network or token, simply create a pull request with the required information.
+Network and token requests are now handled through our built-in community dashboard. Visit the "Community Network Requests" section in the application to submit or vote on network additions.
 
-#### Network Addition
 
-Provide:
-- **Network Name** (e.g., Polygon, Arbitrum)
-- **Chain ID** (e.g., 137, 42161)
 
-#### Token Addition
-
-Provide:
-- **Token Contract Address** (e.g., 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
-- **Network** (e.g., Monad, BNB Smart Chain, Ethereum)
-
-See `.github/PULL_REQUEST_TEMPLATE.md` for the PR template.
 
 ## Security Considerations
 
-Private keys are stored in browser localStorage and never transmitted to external servers. This tool is designed for recovery and testing purposes. For production environments, consider using hardware wallets or secure key management solutions.
-
-Always verify transaction details before signing. Review recipient addresses and amounts carefully.
-
+Private keys are stored in browser localStorage and never transmitted to external servers. 
 ## Technology Stack
 
 - Next.js 15

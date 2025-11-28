@@ -1,42 +1,47 @@
 # Contributing to P2P Recovery
 
-Thank you for your interest in contributing to P2P Recovery! This document provides guidelines for adding new networks and tokens.
+Thank you for your interest in contributing to P2P Recovery! We welcome contributions that improve the core codebase.
 
-## Adding a New Network
+## Network & Token Addition Requests
 
-To request support for a new blockchain network, provide:
+**Note:** The manual PR/issue process for adding networks and tokens is now **defunct**. 
 
-- **Network Name** (e.g., Polygon, Arbitrum, Base)
-- **Chain ID** (e.g., 137, 42161, 8453)
+Please use the **built-in Community Network Requests dashboard** within the application to submit and vote on network additions. This provides a streamlined, community-driven process for expanding network support.
 
-## Adding a New Token
+## Code Contributions
 
-To request support for a new token, provide:
+We welcome pull requests for improvements to the core codebase, including:
 
-- **Token Contract Address** (e.g., 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
-- **Network** (e.g., Monad, BNB Smart Chain, Ethereum)
+- **Bug fixes** - Resolve issues and improve stability
+- **Performance optimizations** - Enhance speed and efficiency
+- **UI/UX improvements** - Better user experience and design
+- **New features** - Innovative functionality that benefits users
+- **Code refactoring** - Cleaner, more maintainable code
+- **Documentation** - Improved guides and explanations
+- **Testing** - Additional test coverage
 
-## How to Submit
+## How to Contribute Code
 
-### Option 1: Create a Pull Request
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/your-improvement`
+3. **Make your changes** with clear, descriptive commits
+4. **Test thoroughly** to ensure no regressions
+5. **Submit a pull request** with a detailed description of your changes
 
-1. Fork the repository
-2. Create a branch: `git checkout -b add-network-polygon` or `git checkout -b add-token-usdt`
-3. Fill out the PR template in `.github/PULL_REQUEST_TEMPLATE.md`
-4. Submit your pull request
+## Code Standards
 
-### Option 2: Create an Issue
-
-1. Go to Issues on GitHub
-2. Use the "Network or Token Addition Request" template
-3. Fill out the required information
-4. Submit the issue
+- Follow existing code style and conventions
+- Write clean, readable, well-documented code
+- Include comments for complex logic
+- Ensure TypeScript type safety
+- Test your changes across different browsers/devices
 
 ## Review Process
 
-All submissions will be reviewed for:
-- Correctness of addresses and chain IDs
-- Network/token legitimacy
-- Verification on block explorers
+All pull requests will be reviewed for:
+- Code quality and adherence to standards
+- Functionality and correctness
+- No introduction of bugs or security issues
+- Alignment with project goals
 
-Thank you for contributing to P2P Recovery!
+Thank you for helping make P2P Recovery better! 🚀

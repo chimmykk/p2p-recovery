@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Loader2, CheckCircle, AlertCircle, Network } from 'lucide-react'
+import { Plus, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 export function NetworkRequestForm() {
   const [networkName, setNetworkName] = useState('')
@@ -75,8 +75,8 @@ export function NetworkRequestForm() {
 
   return (
     <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 shadow-soft" suppressHydrationWarning>
-      <div className="mb-4 sm:mb-5" suppressHydrationWarning>
-        <div suppressHydrationWarning>
+      <div className="mb-4 sm:mb-5">
+        <div>
           <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 bg-brand-500/10 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs font-medium rounded-full border border-brand-500/20">
             Request
           </span>
@@ -88,9 +88,9 @@ export function NetworkRequestForm() {
         Want us to support a new network? Submit a request below!
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4" suppressHydrationWarning>
+      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
         {/* Network Name Input */}
-        <div suppressHydrationWarning>
+        <div>
           <label className="block text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5 sm:mb-2">
             Network Name
           </label>
@@ -105,7 +105,7 @@ export function NetworkRequestForm() {
         </div>
 
         {/* Chain ID Input */}
-        <div suppressHydrationWarning>
+        <div>
           <label className="block text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5 sm:mb-2">
             Chain ID
           </label>

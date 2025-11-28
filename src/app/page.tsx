@@ -38,19 +38,20 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950" suppressHydrationWarning>
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       {/* Navigation Bar */}
       <nav className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3" suppressHydrationWarning>
-          <div className="flex items-center justify-between" suppressHydrationWarning>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
+          <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-2 md:gap-3" suppressHydrationWarning>
+            <div className="flex items-center gap-2 md:gap-3">
               <Image
                 src="/logo.png"
                 alt="P2P.ME Logo"
                 width={160}
                 height={48}
                 className="h-10 md:h-12 w-auto"
+                style={{ width: 'auto', height: 'auto' }}
                 priority
               />
             </div>
@@ -59,9 +60,9 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12 lg:py-16" suppressHydrationWarning>
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12 lg:py-16">
         {/* Page Header */}
-        <div className="mb-8 sm:mb-10 md:mb-14" suppressHydrationWarning>
+        <div className="mb-8 sm:mb-10 md:mb-14">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 md:mb-4">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-semibold text-neutral-900 dark:text-neutral-50">
               Token Recovery
@@ -76,15 +77,15 @@ export default function Home() {
         </div>
 
         {/* How to Get Started Section */}
-        <div className="mb-8 sm:mb-10 md:mb-12" suppressHydrationWarning>
+        <div className="mb-8 sm:mb-10 md:mb-12">
           <a
             href="https://youtube.com/shorts/BMWqLY5zKFc?feature=share"
             target="_blank"
             rel="noopener noreferrer"
             className="group block w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 hover:border-brand-500 dark:hover:border-brand-400 shadow-soft hover:shadow-brand transition-all"
-            suppressHydrationWarning
+
           >
-            <div className="flex items-center justify-between gap-3" suppressHydrationWarning>
+            <div className="flex items-center justify-between gap-3">
               <div className="text-left flex-1 min-w-0">
                 <h3 className="text-sm sm:text-base md:text-lg font-semibold text-neutral-900 dark:text-neutral-50 mb-1">Getting Started Guide</h3>
                 <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">Watch the video tutorial to learn how to use P2P Recovery</p>
@@ -97,10 +98,10 @@ export default function Home() {
         </div>
 
         {/* Network Selector - Mobile Only (shows after stats cards) */}
-        <div className="lg:hidden mb-10 md:mb-12" suppressHydrationWarning>
-          <div className="relative network-selector bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft" suppressHydrationWarning>
-            <div className="flex items-center justify-between mb-4 md:mb-5" suppressHydrationWarning>
-              <div suppressHydrationWarning>
+        <div className="lg:hidden mb-10 md:mb-12">
+          <div className="relative network-selector bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft">
+            <div className="flex items-center justify-between mb-4 md:mb-5">
+              <div>
                 <span className="px-3 py-1 bg-brand-500/10 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs font-medium rounded-full border border-brand-500/20">
                   Network
                 </span>
@@ -115,13 +116,13 @@ export default function Home() {
             <button
               onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
               className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:border-brand-500 dark:hover:border-brand-400 transition-colors"
-              suppressHydrationWarning
+
             >
-              <div className="text-left" suppressHydrationWarning>
-                <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50" suppressHydrationWarning>
+              <div className="text-left">
+                <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
                   {NETWORK_LABELS[selectedNetwork]}
                 </div>
-                <div className="text-xs text-neutral-500 dark:text-neutral-400" suppressHydrationWarning>
+                <div className="text-xs text-neutral-500 dark:text-neutral-400">
                   Chain ID: {NETWORK_CHAIN_IDS[selectedNetwork]}
                 </div>
               </div>
@@ -130,7 +131,7 @@ export default function Home() {
 
             {/* Dropdown */}
             {showNetworkDropdown && (
-              <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium" suppressHydrationWarning>
+              <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium">
                 {getNetworksSortedByLabel().map((networkKey, index, array) => (
                   <button
                     key={networkKey}
@@ -148,18 +149,18 @@ export default function Home() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8" suppressHydrationWarning>
+        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
           {/* Private Key Management */}
-          <div suppressHydrationWarning>
+          <div>
             <PrivateKeyManager network={selectedNetwork} />
           </div>
 
           {/* Token Transfer */}
-          <div className="space-y-5 md:space-y-6" suppressHydrationWarning>
+          <div className="space-y-5 md:space-y-6">
             {/* Network Selector - Desktop Only */}
-            <div className="hidden lg:block relative network-selector bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft" suppressHydrationWarning>
-              <div className="flex items-center justify-between mb-4 md:mb-5" suppressHydrationWarning>
-                <div suppressHydrationWarning>
+            <div className="hidden lg:block relative network-selector bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft">
+              <div className="flex items-center justify-between mb-4 md:mb-5">
+                <div>
                   <span className="px-3 py-1 bg-brand-500/10 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs font-medium rounded-full border border-brand-500/20">
                     Network
                   </span>
@@ -174,13 +175,13 @@ export default function Home() {
               <button
                 onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
                 className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:border-brand-500 dark:hover:border-brand-400 transition-colors"
-                suppressHydrationWarning
+
               >
-                <div className="text-left" suppressHydrationWarning>
-                  <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50" suppressHydrationWarning>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
                     {NETWORK_LABELS[selectedNetwork]}
                   </div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400" suppressHydrationWarning>
+                  <div className="text-xs text-neutral-500 dark:text-neutral-400">
                     Chain ID: {NETWORK_CHAIN_IDS[selectedNetwork]}
                   </div>
                 </div>
@@ -189,7 +190,7 @@ export default function Home() {
 
               {/* Dropdown */}
               {showNetworkDropdown && (
-                <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium" suppressHydrationWarning>
+                <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium">
                   {getNetworksSortedByLabel().map((networkKey, index, array) => (
                     <button
                       key={networkKey}
@@ -210,8 +211,8 @@ export default function Home() {
         </div>
 
         {/* Network Requests Section */}
-        <div className="mt-16 md:mt-24" suppressHydrationWarning>
-          <div className="mb-8 md:mb-10 text-center" suppressHydrationWarning>
+        <div className="mt-16 md:mt-24">
+          <div className="mb-8 md:mb-10 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-neutral-900 dark:text-neutral-50 mb-3">
               Community Network Requests
             </h2>
@@ -220,7 +221,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 md:gap-8" suppressHydrationWarning>
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
             <NetworkRequestForm />
             <NetworkRequestsList />
           </div>
@@ -229,8 +230,8 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-neutral-900 dark:bg-black border-t border-neutral-800 dark:border-neutral-900 mt-8 md:mt-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-5" suppressHydrationWarning>
-          <div className="text-center" suppressHydrationWarning>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-5">
+          <div className="text-center">
             <p className="text-white font-semibold text-sm md:text-base">P2P Recovery</p>
             <p className="text-neutral-400 text-xs md:text-sm mt-1">
               Built by{' '}
