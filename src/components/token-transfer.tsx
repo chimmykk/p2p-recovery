@@ -534,16 +534,16 @@ export function TokenTransfer({ network }: TokenTransferProps) {
 
             {/* Error/Success Messages */}
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-error-light dark:bg-error-dark/20 border border-error/30 rounded-lg text-error-dark dark:text-error-light mt-4">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="text-sm font-medium">{error}</p>
+                <div className="flex items-start gap-3 p-4 bg-error-light dark:bg-error-dark/20 border border-error/30 rounded-lg text-error-dark dark:text-error-light mt-4 overflow-hidden">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm font-medium break-all overflow-wrap-anywhere flex-1">{error}</p>
                 </div>
             )}
 
             {success && !error && (
-                <div className="flex items-center gap-3 p-4 bg-success-light dark:bg-success-dark/20 border border-success/30 rounded-lg text-success-dark dark:text-success-light mt-4">
-                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="text-sm font-medium">{success}</p>
+                <div className="flex items-start gap-3 p-4 bg-success-light dark:bg-success-dark/20 border border-success/30 rounded-lg text-success-dark dark:text-success-light mt-4 overflow-hidden">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm font-medium break-all overflow-wrap-anywhere flex-1">{success}</p>
                 </div>
             )}
 

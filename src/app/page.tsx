@@ -71,7 +71,7 @@ export default function Home() {
             </span>
           </div>
           <p className="text-sm sm:text-base md:text-lg text-neutral-600 dark:text-neutral-400 font-normal max-w-2xl">
-            Safely recover stuck funds from Smart Accounts using ERC-4337
+            Safely recover stuck funds from P2P.ME Smart Account
           </p>
         </div>
 
@@ -276,11 +276,11 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-neutral-900 dark:bg-black border-t border-neutral-800 dark:border-neutral-900 mt-16 md:mt-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10" suppressHydrationWarning>
+      <footer className="bg-neutral-900 dark:bg-black border-t border-neutral-800 dark:border-neutral-900 mt-8 md:mt-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-5" suppressHydrationWarning>
           <div className="text-center" suppressHydrationWarning>
             <p className="text-white font-semibold text-sm md:text-base">P2P Recovery</p>
-            <p className="text-neutral-400 text-xs md:text-sm mt-2">
+            <p className="text-neutral-400 text-xs md:text-sm mt-1">
               Built by{' '}
               <a
                 href="https://github.com/chimmykk/p2p-recovery"
