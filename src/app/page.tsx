@@ -155,10 +155,17 @@ export default function Home() {
                     </button>
                     <button
                       onClick={() => handleNetworkChange('polygon')}
-                      className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors ${selectedNetwork === 'polygon' ? 'bg-green-100' : ''}`}
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors border-b-2 border-black ${selectedNetwork === 'polygon' ? 'bg-green-100' : ''}`}
                     >
                       <div className="font-bold text-black">{NETWORK_LABELS.polygon}</div>
                       <div className="text-xs text-gray-600 font-medium">Chain ID: {NETWORK_CHAIN_IDS.polygon}</div>
+                    </button>
+                    <button
+                      onClick={() => handleNetworkChange('optimism')}
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-100 transition-colors ${selectedNetwork === 'optimism' ? 'bg-green-100' : ''}`}
+                    >
+                      <div className="font-bold text-black">{NETWORK_LABELS.optimism}</div>
+                      <div className="text-xs text-gray-600 font-medium">Chain ID: {NETWORK_CHAIN_IDS.optimism}</div>
                     </button>
                   </div>
                 )}

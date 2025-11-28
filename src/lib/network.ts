@@ -104,9 +104,35 @@ export const polygonChain = defineChain({
     testnet: false,
 });
 
+// Define Optimism Mainnet
+export const optimismChain = defineChain({
+    id: 10,
+    name: 'Optimism',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://optimism-public.nodies.app'],
+        },
+        public: {
+            http: ['https://optimism-public.nodies.app'],
+        },
+    },
+    blockExplorers: {
+        default: {
+            name: 'Optimism Explorer',
+            url: 'https://optimistic.etherscan.io',
+        },
+    },
+    testnet: false,
+});
+
 // Network configuration type
 export type NetworkConfig = {
-    chain: typeof monadMainnet | typeof bnbChain | typeof avalancheChain | typeof polygonChain;
+    chain: typeof monadMainnet | typeof bnbChain | typeof avalancheChain | typeof polygonChain | typeof optimismChain;
     bundlerUrl: string;
     entryPoint: Address;
     factoryAddress: Address;
@@ -115,7 +141,7 @@ export type NetworkConfig = {
 };
 
 // Network key type
-export type NetworkKey = 'monad' | 'bnb' | 'avax' | 'polygon';
+export type NetworkKey = 'monad' | 'bnb' | 'avax' | 'polygon' | 'optimism';
 
 // Network configurations
 export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
@@ -151,6 +177,14 @@ export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
         usdcAddress: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359' as Address,
         usdcDecimals: 6,
     },
+    optimism: {
+        chain: optimismChain,
+        bundlerUrl: 'https://api.pimlico.io/v2/10/rpc?apikey=pim_DgBeb1uoMpzzV4RG1Kxy6E',
+        entryPoint: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789' as Address,
+        factoryAddress: '0xdE320c2E2b4953883f61774c006f9057A55B97D1' as Address,
+        usdcAddress: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85' as Address,
+        usdcDecimals: 6,
+    },
 };
 
 // Network display labels
@@ -159,6 +193,7 @@ export const NETWORK_LABELS: Record<NetworkKey, string> = {
     bnb: 'BNB Smart Chain',
     avax: 'Avalanche',
     polygon: 'Polygon',
+    optimism: 'Optimism',
 };
 
 // Network chain IDs
@@ -167,4 +202,5 @@ export const NETWORK_CHAIN_IDS: Record<NetworkKey, number> = {
     bnb: 56,
     avax: 43114,
     polygon: 137,
+    optimism: 10,
 };

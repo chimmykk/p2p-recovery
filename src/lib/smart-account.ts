@@ -204,7 +204,7 @@ export async function getTokenBalance(
 // Check if smart account is deployed
 export async function isAccountDeployed(
     accountAddress: Address,
-    networkKey: NetworkKey = 'monad'
+    networkKey: NetworkKey
 ): Promise<boolean> {
     const network = NETWORKS[networkKey];
     const publicClient = createPublicClient({

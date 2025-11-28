@@ -1,5 +1,8 @@
 import type { NetworkKey } from './network';
 
+// Default network to use when no network is selected
+const DEFAULT_NETWORK: NetworkKey = 'monad';
+
 // LocalStorage keys
 const PRIVATE_KEY_STORAGE_KEY = 'p2p_recovery_private_key';
 const SMART_ACCOUNT_STORAGE_KEY = 'p2p_recovery_smart_account';
@@ -128,16 +131,17 @@ export function saveSelectedNetwork(network: NetworkKey): void {
  * Get selected network
  */
 export function getSelectedNetwork(): NetworkKey {
-    if (typeof window === 'undefined') return 'monad';
+    if (typeof window === 'undefined') return DEFAULT_NETWORK;
 
     try {
         const network = localStorage.getItem('p2p_recovery_network');
-        if (network === 'bnb' || network === 'avax' || network === 'monad') {
+        // Validate that the network is a valid NetworkKey
+        if (network === 'bnb' || network === 'avax' || network === 'monad' || network === 'polygon' || network === 'optimism') {
             return network as NetworkKey;
         }
-        return 'monad';
+        return DEFAULT_NETWORK;
     } catch (error) {
         console.error('Error retrieving network:', error);
-        return 'monad';
+        return DEFAULT_NETWORK;
     }
 }
