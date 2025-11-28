@@ -338,15 +338,7 @@ export default function Home() {
           <div className="text-center" suppressHydrationWarning>
             <p className="text-white font-bold text-sm md:text-base">P2P RECOVERY</p>
             <p className="text-gray-400 text-xs md:text-sm mt-2 font-medium">
-              built by{' '}
-              <a
-                href="https://x.com/rilso_y"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 transition-colors underline font-bold"
-              >
-                jojo
-              </a>
+              Built by P2P.me Community
             </p>
           </div>
         </div>
