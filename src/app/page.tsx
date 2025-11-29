@@ -44,16 +44,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-0.3">
               <Image
                 src="/logo.png"
                 alt="P2P.ME Logo"
-                width={160}
+                width={48}
                 height={48}
                 className="h-10 md:h-12 w-auto"
-                style={{ width: '125px', height: 'auto' }}
                 priority
               />
+              <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-black dark:text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
+                P2P.ME
+              </h1>
             </div>
           </div>
         </div>
