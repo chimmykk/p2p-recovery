@@ -4,11 +4,11 @@ P2P.ME recovery platform to recover stuck USDC tokens on multiple networks.
 
 ## Overview
 
-This application provides a simple interface for managing private keys, deriving smart account addresses, and executing token transfers using the ERC-4337 account abstraction standard. Private keys are stored locally in browser localStorage with no server-side storage or wallet connection required.
+This application provides a simple interface for connecting wallets, managing smart account addresses, and executing token transfers using the ERC-4337 account abstraction standard. All operations are performed client-side with wallet-based authentication.
 
 ## Features
 
-- Private key management with browser-based storage
+- Wallet connection via Thirdweb
 - ERC-4337 smart account address derivation
 - USDC token transfers via UserOperation flow
 - Multi-chain support (multiple networks)
@@ -38,9 +38,9 @@ npm start
 
 ## Usage
 
-### 1. Private Key Setup
+### 1. Connect Wallet
 
-Enter your private key (64-character hex string with or without 0x prefix). The application will derive and display your EOA owner address.
+Connect your wallet using the wallet connection interface. The application will display your connected address.
 
 ### 2. Smart Account Derivation
 
@@ -80,19 +80,22 @@ src/
 │   ├── page.tsx
 │   └── globals.css
 ├── components/
-│   ├── private-key-manager.tsx
+│   ├── wallet-connect.tsx
+│   ├── smart-account-display.tsx
 │   ├── token-transfer.tsx
 │   ├── network-request-form.tsx
 │   └── network-requests-list.tsx
 └── lib/
     ├── smart-account.ts
     ├── storage.ts
-    └── network.ts
+    ├── network.ts
+    ├── providers.tsx
+    └── thirdwebClient.ts
 ```
 
 ## Transaction Flow
 
-1. Load private key and derive signer account
+1. Connect wallet and retrieve signer account
 2. Query current USDC balance
 3. Retrieve nonce from EntryPoint contract
 4. Encode ERC20 transfer calldata
@@ -100,7 +103,7 @@ src/
 6. Fetch current gas prices from network
 7. Construct UserOperation with dummy signature
 8. Estimate gas limits via bundler RPC
-9. Sign UserOperation hash with private key
+9. Sign UserOperation hash with connected wallet
 10. Submit UserOperation to bundler
 11. Poll for transaction receipt
 12. Display result with explorer link
@@ -110,13 +113,9 @@ src/
 ### Storage Module
 
 ```typescript
-savePrivateKey(privateKey: string): void
-getPrivateKey(): string | null
-clearPrivateKey(): void
-isValidPrivateKey(key: string): boolean
-formatPrivateKey(key: string): string
 saveSmartAccountData(data: object): void
 getSmartAccountData(): object | null
+clearSmartAccountData(): void
 ```
 
 ### Smart Account Module
@@ -126,10 +125,9 @@ deriveSmartAccountAddress(
   admin: Address,
   factory: Address,
   data: `0x${string}`,
-  network: 'monad' | 'bnb'
+  network: string
 ): Promise<Address>
 
-getAccountFromPrivateKey(privateKey: string): Account
 getUserOpHash(userOp: UserOperation, entryPoint: Address, chainId: number): Hash
 formatUserOpForBundler(userOp: UserOperation): object
 bundlerRpc(method: string, params: any[], url: string): Promise<any>
@@ -147,11 +145,12 @@ Network and token requests are now handled through our built-in community dashbo
 
 ## Security Considerations
 
-Private keys are stored in browser localStorage and never transmitted to external servers. 
+All wallet operations are handled client-side through secure wallet connections. No private keys or sensitive data are stored or transmitted to external servers. 
 ## Technology Stack
 
 - Next.js 15
 - TypeScript
+- Thirdweb SDK
 - Viem (Ethereum interactions)
 - Tailwind CSS
 - Lucide React
