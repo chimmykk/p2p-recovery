@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Address, encodeFunctionData, createPublicClient, http } from 'viem'
 import {
-    getPrivateKey,
     getSmartAccountData
 } from '@/lib/storage'
 import {
-    getAccountFromPrivateKey,
     ERC20_ABI,
     SMART_ACCOUNT_ABI,
     ENTRY_POINT_ABI,
@@ -16,10 +14,12 @@ import {
     bundlerRpc,
     getTokenBalance,
     isAccountDeployed,
-    getInitCode
+    getInitCode,
+    signUserOpHashWithThirdwebWallet
 } from '@/lib/smart-account'
 import { Send, ArrowRight, Loader2, CheckCircle, AlertCircle, Copy, X, AlertTriangle } from 'lucide-react'
 import { NETWORKS, NETWORK_LABELS, type NetworkKey } from '@/lib/network'
+import { useActiveAccount, useActiveWallet } from 'thirdweb/react'
 
 const DUMMY_SIGNATURE = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c'
 
@@ -28,6 +28,8 @@ interface TokenTransferProps {
 }
 
 export function TokenTransfer({ network }: TokenTransferProps) {
+    const account = useActiveAccount()
+    const wallet = useActiveWallet()
     const [transferMode, setTransferMode] = useState<'send' | 'recover'>('send')
     const [recipient, setRecipient] = useState('')
     const [amount, setAmount] = useState('')
@@ -38,21 +40,23 @@ export function TokenTransfer({ network }: TokenTransferProps) {
     const [smartAccountAddress, setSmartAccountAddress] = useState('')
     const [ownerAddress, setOwnerAddress] = useState('')
     const [balance, setBalance] = useState('0')
-    const [hasPrivateKey, setHasPrivateKey] = useState(false)
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [fundingAddress, setFundingAddress] = useState<string>('')
 
     useEffect(() => {
         const loadData = () => {
-            const key = getPrivateKey()
-            setHasPrivateKey(!!key)
+            if (account?.address) {
+                setOwnerAddress(account.address)
+            }
 
             const accountData = getSmartAccountData()
             if (accountData?.smartAccountAddress) {
                 setSmartAccountAddress(accountData.smartAccountAddress)
-                fetchBalance(accountData.smartAccountAddress as Address)
+                // Balance will be fetched by the network/smartAccountAddress useEffect
             }
-            if (accountData?.ownerAddress) {
+            if (account?.address && !accountData?.ownerAddress) {
+                setOwnerAddress(account.address)
+            } else if (accountData?.ownerAddress) {
                 setOwnerAddress(accountData.ownerAddress)
             }
         }
@@ -60,9 +64,9 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         // Load initial data
         loadData()
 
-        // Listen for storage changes (when PrivateKeyManager saves data)
+        // Listen for storage changes (when SmartAccountDisplay saves data)
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'p2p_recovery_smart_account' || e.key === 'p2p_recovery_private_key') {
+            if (e.key === 'p2p_recovery_smart_account') {
                 loadData()
             }
         }
@@ -72,23 +76,55 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             loadData()
         }
 
+        // Listen for network changes
+        const handleNetworkChange = () => {
+            // Reset balance and wait 
+            setBalance('0')
+            // Small delay to allow SmartAccountDisplay to update first
+            setTimeout(() => {
+                loadData()
+            }, 100)
+        }
+
         window.addEventListener('storage', handleStorageChange)
         window.addEventListener('smartAccountUpdated', handleCustomUpdate)
+        window.addEventListener('networkChanged', handleNetworkChange)
 
         return () => {
             window.removeEventListener('storage', handleStorageChange)
             window.removeEventListener('smartAccountUpdated', handleCustomUpdate)
+            window.removeEventListener('networkChanged', handleNetworkChange)
         }
-    }, [])
+    }, [account?.address, network])
 
-    // Refresh balance when network changes
+    // Refresh balance when network changes or smart account address changes
     useEffect(() => {
         if (smartAccountAddress) {
-            fetchBalance(smartAccountAddress as Address)
+            // Reset balance first
+            setBalance('0')
+            // Then fetch new balance for the new network
+            const address = smartAccountAddress as Address
+            const networkConfig = NETWORKS[network]
+            getTokenBalance(networkConfig.usdcAddress, address, network)
+                .then((bal) => {
+                    const divisor = Math.pow(10, networkConfig.usdcDecimals)
+                    setBalance((Number(bal) / divisor).toFixed(2))
+                })
+                .catch((err) => {
+                    console.error('Error fetching balance:', err)
+                    setBalance('0')
+                })
+        } else {
+            // Clear balance if no smart account address
+            setBalance('0')
         }
-    }, [network])
+    }, [network, smartAccountAddress])
 
     const fetchBalance = async (address: Address) => {
+        if (!address) {
+            setBalance('0')
+            return
+        }
         try {
             const networkConfig = NETWORKS[network];
             const bal = await getTokenBalance(networkConfig.usdcAddress, address, network)
@@ -96,6 +132,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             setBalance((Number(bal) / divisor).toFixed(2))
         } catch (err) {
             console.error('Error fetching balance:', err)
+            setBalance('0')
         }
     }
 
@@ -111,8 +148,8 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         setTxHash('')
 
         // Validation
-        if (!hasPrivateKey) {
-            setError('Please save a private key first')
+        if (!wallet || !account) {
+            setError('Please connect your wallet first')
             return
         }
 
@@ -147,10 +184,9 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         setIsLoading(true)
 
         try {
-            const privateKey = getPrivateKey()
-            if (!privateKey) throw new Error('Private key not found')
-
-            const signer = getAccountFromPrivateKey(privateKey)
+            if (!wallet || !account) {
+                throw new Error('Wallet not connected')
+            }
 
             // Create public client
             const publicClient = createPublicClient({
@@ -164,7 +200,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             // Generate initCode if account is not deployed
             let initCode: `0x${string}` = '0x'
             if (!deployed) {
-                initCode = getInitCode(networkConfig.factoryAddress, signer.address)
+                initCode = getInitCode(networkConfig.factoryAddress, account.address as Address)
                 console.log('Account not deployed, including initCode for deployment')
             }
 
@@ -235,12 +271,28 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 console.warn('Gas estimation failed, using defaults:', e.message)
             }
 
-            // Sign UserOperation
+            // Sign UserOperation using Thirdweb wallet (owner account, not smart account)
+            // The owner account is the one that controls the smart account
             userOp.signature = '0x' as `0x${string}`
             const userOpHash = getUserOpHash(userOp, networkConfig.entryPoint, networkConfig.chain.id)
-            const signature = await signer.signMessage({
-                message: { raw: userOpHash },
-            })
+
+            // Get owner account address (the connected wallet address that controls the smart account)
+            let ownerAddress = account.address as Address
+            if (wallet.getAdminAccount) {
+                try {
+                    const adminAccount = await wallet.getAdminAccount()
+                    if (adminAccount?.address) {
+                        ownerAddress = adminAccount.address as Address
+                    }
+                } catch (e) {
+                    console.warn('Could not get admin account, using connected account:', e)
+                }
+            }
+
+            const signature = await signUserOpHashWithThirdwebWallet(
+                wallet,
+                userOpHash
+            )
             userOp.signature = signature
 
             // Submit to bundler
@@ -302,22 +354,6 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         } finally {
             setIsLoading(false)
         }
-    }
-
-    if (!hasPrivateKey || !smartAccountAddress) {
-        return (
-            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-8 md:p-10 text-center shadow-soft">
-                <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-full flex items-center justify-center">
-                        <AlertCircle className="w-8 h-8 text-neutral-400" />
-                    </div>
-                </div>
-                <h3 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mb-2">Setup Required</h3>
-                <p className="text-sm md:text-base text-neutral-600 dark:text-neutral-400">
-                    Please save your private key and derive your smart account address to enable token transfers.
-                </p>
-            </div>
-        )
     }
 
     return (

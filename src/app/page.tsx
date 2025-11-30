@@ -2,17 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { PrivateKeyManager } from '@/components/private-key-manager'
 import { TokenTransfer } from '@/components/token-transfer'
 import { NetworkRequestForm } from '@/components/network-request-form'
 import { NetworkRequestsList } from '@/components/network-requests-list'
-import { ChevronDown, Search } from 'lucide-react'
+import { WalletConnect } from '@/components/wallet-connect'
+import { SmartAccountDisplay } from '@/components/smart-account-display'
+import { ChevronDown, Search, Wallet } from 'lucide-react'
 import { saveSelectedNetwork, getSelectedNetwork } from '@/lib/storage'
 import { NETWORK_LABELS, NETWORK_CHAIN_IDS, getNetworksSortedByLabel, type NetworkKey } from '@/lib/network'
 
 export default function Home() {
   const [selectedNetwork, setSelectedNetwork] = useState<NetworkKey>('monad')
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false)
+  const [p2pUserWallet, setP2pUserWallet] = useState<string>('')
+  const [smartAccountAddress, setSmartAccountAddress] = useState<string>('')
 
   useEffect(() => {
     setSelectedNetwork(getSelectedNetwork())
@@ -79,13 +82,12 @@ export default function Home() {
         </div>
 
         {/* How to Get Started Section */}
-        <div className="mb-8 sm:mb-10 md:mb-12">
+        <div className="mb-6 sm:mb-8">
           <a
             href="https://youtube.com/shorts/BMWqLY5zKFc?feature=share"
             target="_blank"
             rel="noopener noreferrer"
             className="group block w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 hover:border-brand-500 dark:hover:border-brand-400 shadow-soft hover:shadow-brand transition-all"
-
           >
             <div className="flex items-center justify-between gap-3">
               <div className="text-left flex-1 min-w-0">
@@ -97,6 +99,11 @@ export default function Home() {
               </svg>
             </div>
           </a>
+        </div>
+
+        {/* Compact Connect Wallet Button */}
+        <div className="mb-8 sm:mb-10 md:mb-12 flex justify-start">
+          <WalletConnect onP2PWalletChange={setP2pUserWallet} compact />
         </div>
 
         {/* Network Selector - Mobile Only (shows after stats cards) */}
@@ -150,65 +157,92 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
-          {/* Private Key Management */}
-          <div>
-            <PrivateKeyManager network={selectedNetwork} />
+        {/* Main Grid - Smart Account & Token Transfer */}
+        <div className="mb-8 md:mb-10">
+          <div className="mb-6 md:mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-neutral-900 dark:text-neutral-50 mb-2">
+              Recover Your Tokens
+            </h2>
+            <p className="text-base text-neutral-600 dark:text-neutral-400">
+              View your smart account and transfer tokens from your P2P.ME Smart Account
+            </p>
           </div>
 
-          {/* Token Transfer */}
-          <div className="space-y-5 md:space-y-6">
-            {/* Network Selector - Desktop Only */}
-            <div className="hidden lg:block relative network-selector bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft">
-              <div className="flex items-center justify-between mb-4 md:mb-5">
-                <div>
-                  <span className="px-3 py-1 bg-brand-500/10 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs font-medium rounded-full border border-brand-500/20">
-                    Network
-                  </span>
-                  <h3 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mt-2">Switch Network</h3>
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
+            {/* Smart Account Display */}
+            <div>
+              <SmartAccountDisplay 
+                network={selectedNetwork} 
+                p2pUserWallet={p2pUserWallet}
+                onSmartAccountChange={setSmartAccountAddress}
+              />
+            </div>
+
+            {/* Token Transfer */}
+            <div className="space-y-5 md:space-y-6">
+              {/* Network Selector - Desktop Only */}
+              <div className="hidden lg:block relative network-selector bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 md:p-6 shadow-soft">
+                <div className="flex items-center justify-between mb-4 md:mb-5">
+                  <div>
+                    <span className="px-3 py-1 bg-brand-500/10 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs font-medium rounded-full border border-brand-500/20">
+                      Network
+                    </span>
+                    <h3 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mt-2">Switch Network</h3>
+                  </div>
                 </div>
+
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+                  Select your blockchain network
+                </p>
+
+                <button
+                  onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:border-brand-500 dark:hover:border-brand-400 transition-colors"
+                >
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
+                      {NETWORK_LABELS[selectedNetwork]}
+                    </div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Chain ID: {NETWORK_CHAIN_IDS[selectedNetwork]}
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform ${showNetworkDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown */}
+                {showNetworkDropdown && (
+                  <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium">
+                    {getNetworksSortedByLabel().map((networkKey, index, array) => (
+                      <button
+                        key={networkKey}
+                        onClick={() => handleNetworkChange(networkKey)}
+                        className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${index < array.length - 1 ? 'border-b border-neutral-200 dark:border-neutral-700' : ''
+                          } ${selectedNetwork === networkKey ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
+                      >
+                        <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS[networkKey]}</div>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS[networkKey]}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
-                Select your blockchain network
-              </p>
-
-              <button
-                onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:border-brand-500 dark:hover:border-brand-400 transition-colors"
-
-              >
-                <div className="text-left">
-                  <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
-                    {NETWORK_LABELS[selectedNetwork]}
+              {smartAccountAddress ? (
+                <TokenTransfer network={selectedNetwork} />
+              ) : (
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-8 md:p-12 shadow-soft">
+                  <div className="text-center">
+                    <h3 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mb-2">
+                      Connect Wallet to Transfer Tokens
+                    </h3>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                      Please connect your wallet and wait for your Smart Account address to be derived before you can transfer tokens.
+                    </p>
                   </div>
-                  <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                    Chain ID: {NETWORK_CHAIN_IDS[selectedNetwork]}
-                  </div>
-                </div>
-                <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform ${showNetworkDropdown ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Dropdown */}
-              {showNetworkDropdown && (
-                <div className="mt-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden shadow-medium">
-                  {getNetworksSortedByLabel().map((networkKey, index, array) => (
-                    <button
-                      key={networkKey}
-                      onClick={() => handleNetworkChange(networkKey)}
-                      className={`w-full px-4 py-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors ${index < array.length - 1 ? 'border-b border-neutral-200 dark:border-neutral-700' : ''
-                        } ${selectedNetwork === networkKey ? 'bg-brand-50 dark:bg-brand-950/30' : ''}`}
-                    >
-                      <div className="font-medium text-neutral-900 dark:text-neutral-50">{NETWORK_LABELS[networkKey]}</div>
-                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Chain ID: {NETWORK_CHAIN_IDS[networkKey]}</div>
-                    </button>
-                  ))}
                 </div>
               )}
             </div>
-
-            <TokenTransfer network={selectedNetwork} />
           </div>
         </div>
 

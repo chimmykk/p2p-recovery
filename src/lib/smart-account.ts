@@ -10,9 +10,10 @@ import {
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { NETWORKS, type NetworkKey } from './network';
+import type { Wallet } from 'thirdweb/wallets';
 
 
-// ABIs
+// Contract ABIs
 export const ENTRY_POINT_ABI = [
     {
         inputs: [
@@ -74,6 +75,14 @@ export async function deriveSmartAccountAddress(
     });
 
     try {
+        // First check if the contract exists at the address
+        const code = await publicClient.getBytecode({ address: factoryAddress });
+        if (!code || code === '0x') {
+            const error = new Error('Factory not deployed on this network yet');
+            (error as any).isHandled = true;
+            throw error;
+        }
+
         const smartAccountAddress = await publicClient.readContract({
             address: factoryAddress,
             abi: ACCOUNT_FACTORY_ABI,
@@ -81,22 +90,78 @@ export async function deriveSmartAccountAddress(
             args: [adminAddress, data],
         });
 
+        // Check if the result is valid (not empty)
+        if (!smartAccountAddress || smartAccountAddress === '0x' || smartAccountAddress === '0x0000000000000000000000000000000000000000') {
+            const error = new Error('Factory not deployed on this network yet');
+            (error as any).isHandled = true;
+            throw error;
+        }
+
         return smartAccountAddress as Address;
-    } catch (error) {
-        console.error('Error deriving smart account address:', error);
-        throw error;
+    } catch (error: any) {
+        if ((error as any).isHandled) {
+            throw error;
+        }
+        // Just handle all errors 
+        if (error?.message?.includes('returned no data') ||
+            error?.message?.includes('does not have the function') ||
+            error?.message?.includes('address is not a contract') ||
+            error?.name === 'ContractFunctionExecutionError') {
+            const friendlyError = new Error('Factory not deployed on this network yet');
+            (friendlyError as any).isHandled = true;
+            throw friendlyError;
+        }
+
+        const genericError = new Error('Failed to derive smart account address');
+        (genericError as any).isHandled = true;
+        throw genericError;
     }
 }
 
-// Helper function to get account from private key
-export function getAccountFromPrivateKey(privateKey: string) {
-    try {
-        const account = privateKeyToAccount(privateKey as `0x${string}`);
-        return account;
-    } catch (error) {
-        console.error('Error creating account from private key:', error);
-        throw error;
+
+
+// Helper to sign userOpHash using the connected thirdweb wallet/address
+export async function signUserOpHashWithThirdwebWallet(
+    wallet: Wallet,
+    userOpHash: `0x${string}`
+): Promise<`0x${string}`> {
+    // Get the owner/admin account from the wallet (the account that controls the smart account)
+    let ownerAccount = null;
+
+    // Try getAdminAccount first (for smart accounts, this gets the owner)
+    if (wallet.getAdminAccount) {
+        try {
+            ownerAccount = await wallet.getAdminAccount();
+        } catch (e) {
+            // Fall through to getAccount
+        }
     }
+
+    // Fallback to getAccount (the connected wallet account)
+    if (!ownerAccount) {
+        ownerAccount = wallet.getAccount();
+    }
+
+    if (!ownerAccount) {
+        throw new Error('No owner account found in wallet');
+    }
+
+    // Sign using owner account's signMessage
+    try {
+        const sig = await ownerAccount.signMessage({
+            message: { raw: userOpHash },
+        });
+        if (typeof sig === "string" && sig.startsWith("0x")) {
+            return sig as `0x${string}`;
+        }
+    } catch (error) {
+        // Fall through to error
+    }
+
+    throw new Error(
+        `Unable to get raw signature for ERC-4337 UserOperation from owner account ${ownerAccount.address}. ` +
+        "checks for lgs."
+    );
 }
 
 // Pack UserOperation for hashing (ERC-4337 v0.6)
@@ -365,3 +430,187 @@ export async function deploySmartAccount(
         };
     }
 }
+
+// Deploy smart account using thirdweb wallet (follows same pattern as token transfers)
+export async function deploySmartAccountWithWallet(
+    wallet: Wallet,
+    smartAccountAddress: Address,
+    networkKey: NetworkKey = 'monad'
+): Promise<{ success: boolean; txHash?: string; userOpHash?: string; error?: string }> {
+    try {
+        const network = NETWORKS[networkKey];
+
+        // Check if already deployed
+        const deployed = await isAccountDeployed(smartAccountAddress, networkKey);
+        if (deployed) {
+            return { success: false, error: 'Account is already deployed' };
+        }
+
+        // Get the owner/admin account from the wallet
+        let ownerAccount = null;
+
+        // Try getAdminAccount first (for smart accounts, this gets the owner)
+        if (wallet.getAdminAccount) {
+            try {
+                ownerAccount = await wallet.getAdminAccount();
+            } catch (e) {
+                // Fall through to getAccount
+            }
+        }
+
+        // Fallback to getAccount (the connected wallet account)
+        if (!ownerAccount) {
+            ownerAccount = wallet.getAccount();
+        }
+
+        if (!ownerAccount || !ownerAccount.address) {
+            return {
+                success: false,
+                error: 'No owner account found in wallet'
+            };
+        }
+
+        const ownerAddress = ownerAccount.address as Address;
+
+        // Create public client
+        const publicClient = createPublicClient({
+            chain: network.chain,
+            transport: http(network.chain.rpcUrls.default.http[0]),
+        });
+
+        // Generate initCode using owner address
+        const initCode = getInitCode(network.factoryAddress, ownerAddress);
+
+        // Get nonce
+        const nonce = await publicClient.readContract({
+            address: network.entryPoint,
+            abi: ENTRY_POINT_ABI,
+            functionName: 'getNonce',
+            args: [smartAccountAddress, 0n],
+        });
+
+        // Get gas prices from Pimlico
+        let maxFeePerGas: bigint;
+        let maxPriorityFeePerGas: bigint;
+
+        try {
+            const gasPrices = await bundlerRpc('pimlico_getUserOperationGasPrice', [], network.bundlerUrl);
+            maxFeePerGas = BigInt(gasPrices.standard.maxFeePerGas);
+            maxPriorityFeePerGas = BigInt(gasPrices.standard.maxPriorityFeePerGas);
+        } catch (e) {
+            console.warn('Failed to get bundler gas prices, using fallback');
+            maxFeePerGas = 1500000000n; // 1.5 gwei minimum
+            maxPriorityFeePerGas = 1500000000n;
+        }
+
+        // Dummy signature for gas estimation
+        const DUMMY_SIG = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c';
+
+        // Build UserOperation for deployment (empty callData - just deploy)
+        let userOp = {
+            sender: smartAccountAddress,
+            nonce: nonce,
+            initCode: initCode,
+            callData: '0x' as `0x${string}`, // Empty call - just deploy
+            callGasLimit: 100000n,
+            verificationGasLimit: 1000000n, // Higher for deployment
+            preVerificationGas: 500000n,
+            maxFeePerGas: maxFeePerGas,
+            maxPriorityFeePerGas: maxPriorityFeePerGas,
+            paymasterAndData: '0x' as `0x${string}`,
+            signature: DUMMY_SIG as `0x${string}`,
+        };
+
+        // Estimate gas
+        try {
+            const gasEstimate = await bundlerRpc('eth_estimateUserOperationGas', [
+                formatUserOpForBundler(userOp),
+                network.entryPoint,
+            ], network.bundlerUrl);
+
+            if (gasEstimate) {
+                userOp.callGasLimit = BigInt(gasEstimate.callGasLimit || '0x186a0');
+                userOp.verificationGasLimit = BigInt(gasEstimate.verificationGasLimit || '0xf4240');
+                userOp.preVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x7a120');
+            }
+        } catch (e: any) {
+            console.warn('Gas estimation failed, using defaults:', e.message);
+        }
+
+        // Sign UserOperation using Thirdweb wallet
+        userOp.signature = '0x' as `0x${string}`;
+        const userOpHash = getUserOpHash(userOp, network.entryPoint, network.chain.id);
+
+        const signature = await signUserOpHashWithThirdwebWallet(
+            wallet,
+            userOpHash
+        );
+        userOp.signature = signature;
+
+        // Submit to bundler
+        const formattedUserOp = formatUserOpForBundler(userOp);
+        let userOpHashResult: string;
+        try {
+            userOpHashResult = await bundlerRpc('eth_sendUserOperation', [
+                formattedUserOp,
+                network.entryPoint,
+            ], network.bundlerUrl);
+        } catch (bundlerError: any) {
+            // Check for prefund error
+            const errorMessage = bundlerError.message || JSON.stringify(bundlerError);
+            if (errorMessage.includes('didn\'t pay prefund') || errorMessage.includes('AA21')) {
+                return {
+                    success: false,
+                    error: 'Fund your smart account address'
+                };
+            }
+            throw bundlerError; // Re-throw if not a prefund error
+        }
+
+        // Wait for receipt
+        let receipt = null;
+        let attempts = 0;
+
+        while (!receipt && attempts < 30) {
+            await new Promise(r => setTimeout(r, 2000));
+            try {
+                receipt = await bundlerRpc('eth_getUserOperationReceipt', [userOpHashResult], network.bundlerUrl);
+            } catch (e) {
+                // Receipt not ready yet
+            }
+            attempts++;
+        }
+
+        if (receipt && receipt.success) {
+            return {
+                success: true,
+                txHash: receipt.receipt?.transactionHash,
+                userOpHash: userOpHashResult
+            };
+        } else {
+            return {
+                success: false,
+                error: 'Deployment transaction pending or failed',
+                userOpHash: userOpHashResult
+            };
+        }
+
+    } catch (error: any) {
+        console.error('Error deploying smart account with wallet:', error);
+        
+        // Check for prefund error
+        const errorMessage = error.message || JSON.stringify(error);
+        if (errorMessage.includes('didn\'t pay prefund') || errorMessage.includes('AA21')) {
+            return {
+                success: false,
+                error: 'Fund your smart account address'
+            };
+        }
+        
+        return {
+            success: false,
+            error: error.message || 'Failed to deploy smart account'
+        };
+    }
+}
+

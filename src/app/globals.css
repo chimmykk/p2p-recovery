@@ -225,3 +225,26 @@ select,
 textarea {
   transition: all 0.2s ease-in-out;
 }
+
+/* Fix nested button issue in thirdweb ConnectButton modal */
+/* Make nested buttons work by preventing pointer events on outer button */
+/* This is a fallback in case JavaScript fix doesn't work */
+.tw-modal button button,
+[role="dialog"] button button {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Modern browsers: Convert outer button to div-like element when it contains a button */
+@supports selector(:has(*)) {
+  .tw-modal button:has(> button),
+  [role="dialog"] button:has(> button) {
+    pointer-events: none;
+  }
+
+  .tw-modal button:has(> button) > *,
+  [role="dialog"] button:has(> button) > * {
+    pointer-events: auto;
+  }
+}

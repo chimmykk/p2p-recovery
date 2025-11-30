@@ -1,6 +1,20 @@
 import { defineChain, Address } from 'viem';
+import { defineChain as defineThirdwebChain } from "thirdweb/chains";
 
-// Define Monad Mainnet
+// Thirdweb chain def method use only when using thirdweb ui for displaying wallet components
+export const monadChain = defineThirdwebChain({
+    id: 143,
+    name: "Monad Mainnet",
+    nativeCurrency: {
+        decimals: 18,
+        name: "Monad",
+        symbol: "MON",
+    },
+    rpc: "https://rpc3.monad.xyz",
+});
+// Custom chain def viem client
+
+// Monad Mainnet
 export const monadMainnet = defineChain({
     id: 143,
     name: 'Monad Mainnet',
@@ -26,7 +40,7 @@ export const monadMainnet = defineChain({
     testnet: false,
 });
 
-// Define BNB Smart Chain
+// BNB Smart Chain
 export const bnbChain = defineChain({
     id: 56,
     name: 'BNB Smart Chain',
@@ -52,7 +66,7 @@ export const bnbChain = defineChain({
     testnet: false,
 });
 
-// Define Avalanche C-Chain
+//  Avalanche C-Chain
 export const avalancheChain = defineChain({
     id: 43114,
     name: 'Avalanche C-Chain',
@@ -78,7 +92,7 @@ export const avalancheChain = defineChain({
     testnet: false,
 });
 
-// Define Polygon Mainnet
+// Polygon Mainnet
 export const polygonChain = defineChain({
     id: 137,
     name: 'Polygon',
@@ -130,7 +144,7 @@ export const optimismChain = defineChain({
     testnet: false,
 });
 
-// Define HyperLiquid Mainnet
+// HyperLiquid Mainnet
 export const hyperliquidChain = defineChain({
     id: 999,
     name: 'HyperLiquid',
@@ -156,9 +170,87 @@ export const hyperliquidChain = defineChain({
     testnet: false,
 });
 
+// Ethereum Mainnet
+export const ethereumChain = defineChain({
+    id: 1,
+    name: 'Ethereum',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://eth.llamarpc.com'],
+        },
+        public: {
+            http: ['https://eth.llamarpc.com'],
+        },
+    },
+    blockExplorers: {
+        default: {
+            name: 'Etherscan',
+            url: 'https://etherscan.io',
+        },
+    },
+    testnet: false,
+});
+
+// Arbitrum One
+export const arbitrumChain = defineChain({
+    id: 42161,
+    name: 'Arbitrum One',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://arb1.arbitrum.io/rpc'],
+        },
+        public: {
+            http: ['https://arb1.arbitrum.io/rpc'],
+        },
+    },
+    blockExplorers: {
+        default: {
+            name: 'Arbiscan',
+            url: 'https://arbiscan.io',
+        },
+    },
+    testnet: false,
+});
+
+// Mantle Mainnet
+export const mantleChain = defineChain({
+    id: 5000,
+    name: 'Mantle',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Mantle',
+        symbol: 'MNT',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://mantle-public.nodies.app'],
+        },
+        public: {
+            http: ['https://mantle-public.nodies.app'],
+        },
+    },
+    blockExplorers: {
+        default: {
+            name: 'Mantle Explorer',
+            url: 'https://explorer.mantle.xyz',
+        },
+    },
+    testnet: false,
+});
+
 // Network configuration type
 export type NetworkConfig = {
-    chain: typeof monadMainnet | typeof bnbChain | typeof avalancheChain | typeof polygonChain | typeof optimismChain | typeof hyperliquidChain;
+    chain: typeof monadMainnet | typeof bnbChain | typeof avalancheChain | typeof polygonChain | typeof optimismChain | typeof hyperliquidChain | typeof ethereumChain | typeof arbitrumChain | typeof mantleChain;
     bundlerUrl: string;
     entryPoint: Address;
     factoryAddress: Address;
@@ -167,7 +259,7 @@ export type NetworkConfig = {
 };
 
 // Network key type
-export type NetworkKey = 'monad' | 'bnb' | 'avax' | 'polygon' | 'optimism' | 'hyperliquid';
+export type NetworkKey = 'monad' | 'bnb' | 'avax' | 'polygon' | 'optimism' | 'hyperliquid' | 'ethereum' | 'arbitrum' | 'mantle';
 
 // Network configurations
 export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
@@ -219,6 +311,30 @@ export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
         usdcAddress: '0xb88339CB7199b77E23DB6E890353E22632Ba630f' as Address,
         usdcDecimals: 6,
     },
+    ethereum: {
+        chain: ethereumChain,
+        bundlerUrl: 'https://api.pimlico.io/v2/1/rpc?apikey=pim_DgBeb1uoMpzzV4RG1Kxy6E',
+        entryPoint: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789' as Address,
+        factoryAddress: '0xdE320c2E2b4953883f61774c006f9057A55B97D1' as Address,
+        usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as Address,
+        usdcDecimals: 6,
+    },
+    arbitrum: {
+        chain: arbitrumChain,
+        bundlerUrl: 'https://api.pimlico.io/v2/42161/rpc?apikey=pim_DgBeb1uoMpzzV4RG1Kxy6E',
+        entryPoint: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789' as Address,
+        factoryAddress: '0xdE320c2E2b4953883f61774c006f9057A55B97D1' as Address,
+        usdcAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' as Address,
+        usdcDecimals: 6,
+    },
+    mantle: {
+        chain: mantleChain,
+        bundlerUrl: 'https://api.pimlico.io/v2/5000/rpc?apikey=pim_DgBeb1uoMpzzV4RG1Kxy6E',
+        entryPoint: '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789' as Address,
+        factoryAddress: '0xdE320c2E2b4953883f61774c006f9057A55B97D1' as Address,
+        usdcAddress: '0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9' as Address,
+        usdcDecimals: 6,
+    },
 };
 
 // Network display labels
@@ -229,6 +345,9 @@ export const NETWORK_LABELS: Record<NetworkKey, string> = {
     polygon: 'Polygon',
     optimism: 'Optimism',
     hyperliquid: 'HyperLiquid',
+    ethereum: 'Ethereum',
+    arbitrum: 'Arbitrum',
+    mantle: 'Mantle',
 };
 
 // Network chain IDs
@@ -239,6 +358,9 @@ export const NETWORK_CHAIN_IDS: Record<NetworkKey, number> = {
     polygon: 137,
     optimism: 10,
     hyperliquid: 999,
+    ethereum: 1,
+    arbitrum: 42161,
+    mantle: 5000,
 };
 
 // Helper to get all networks sorted alphabetically by label
