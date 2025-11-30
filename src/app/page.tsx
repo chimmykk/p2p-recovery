@@ -84,7 +84,7 @@ export default function Home() {
         {/* How to Get Started Section */}
         <div className="mb-6 sm:mb-8">
           <a
-            href="https://youtube.com/shorts/BMWqLY5zKFc?feature=share"
+            href="https://youtube.com/shorts/kPV5I8Pp-z0?feature=share"
             target="_blank"
             rel="noopener noreferrer"
             className="group block w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 hover:border-brand-500 dark:hover:border-brand-400 shadow-soft hover:shadow-brand transition-all"
@@ -171,8 +171,8 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
             {/* Smart Account Display */}
             <div>
-              <SmartAccountDisplay 
-                network={selectedNetwork} 
+              <SmartAccountDisplay
+                network={selectedNetwork}
                 p2pUserWallet={p2pUserWallet}
                 onSmartAccountChange={setSmartAccountAddress}
               />

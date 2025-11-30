@@ -40,15 +40,14 @@ npm start
 
 ### 1. Connect Wallet
 
-Connect your wallet using the wallet connection interface. The application will display your connected address.
-
+Connect your wallet using the wallet connection interface. 
 ### 2. Smart Account Derivation
 
 Configure the factory contract:
 - Factory Address: `0xdE320c2E2b4953883f61774c006f9057A55B97D1` (default)
 - Factory Data: `0x` (optional initialization bytes)
 
-Click derive to generate your smart account address and view USDC balance.
+auto derive to generate your smart account address and view USDC balance.
 
 ### 3. Token Transfer
 
