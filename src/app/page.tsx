@@ -103,7 +103,7 @@ export default function Home() {
 
         {/* Compact Connect Wallet Button */}
         <div className="mb-8 sm:mb-10 md:mb-12 flex justify-start">
-          <WalletConnect onP2PWalletChange={setP2pUserWallet} compact />
+          <WalletConnect onP2PWalletChange={setP2pUserWallet} compact selectedNetwork={selectedNetwork} />
         </div>
 
         {/* Network Selector - Mobile Only (shows after stats cards) */}
