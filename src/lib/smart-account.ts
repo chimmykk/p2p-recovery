@@ -11,6 +11,7 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { NETWORKS, type NetworkKey } from './network';
 import type { Wallet } from 'thirdweb/wallets';
+import { client } from './thirdwebClient';
 
 
 // Contract ABIs
@@ -244,6 +245,67 @@ export async function bundlerRpc(method: string, params: any[], bundlerRpcUrl: s
     return data.result;
 }
 
+// Get Thirdweb Paymaster data for sponsored transactions
+export async function getThirdwebPaymasterData(
+    userOp: any,
+    entryPoint: Address,
+    chainId: number
+): Promise<{ paymasterAndData: `0x${string}` }> {
+    try {
+        const clientId = client.clientId;
+        if (!clientId) {
+            console.warn('No Thirdweb client ID found, skipping paymaster');
+            return { paymasterAndData: '0x' as `0x${string}` };
+        }
+
+        // Thirdweb paymaster endpoint
+        const paymasterUrl = `https://${chainId}.bundler.thirdweb.com/${clientId}`;
+
+        const response = await fetch(paymasterUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'pm_sponsorUserOperation',
+                params: [
+                    {
+                        sender: userOp.sender,
+                        nonce: toHex(userOp.nonce),
+                        initCode: userOp.initCode,
+                        callData: userOp.callData,
+                        callGasLimit: toHex(userOp.callGasLimit),
+                        verificationGasLimit: toHex(userOp.verificationGasLimit),
+                        preVerificationGas: toHex(userOp.preVerificationGas),
+                        maxFeePerGas: toHex(userOp.maxFeePerGas),
+                        maxPriorityFeePerGas: toHex(userOp.maxPriorityFeePerGas),
+                    },
+                    entryPoint,
+                ],
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            console.warn('Paymaster sponsorship failed:', data.error);
+            return { paymasterAndData: '0x' as `0x${string}` };
+        }
+
+        if (data.result?.paymasterAndData) {
+            console.log('Gas sponsored by Thirdweb paymaster');
+            return { paymasterAndData: data.result.paymasterAndData as `0x${string}` };
+        }
+
+        return { paymasterAndData: '0x' as `0x${string}` };
+    } catch (error) {
+        console.warn('Error getting paymaster data:', error);
+        return { paymasterAndData: '0x' as `0x${string}` };
+    }
+}
+
 // Get token balance
 export async function getTokenBalance(
     tokenAddress: Address,
@@ -356,7 +418,7 @@ export async function deploySmartAccount(
             callData: '0x' as `0x${string}`, // Empty call - just deploy
             callGasLimit: 100000n,
             verificationGasLimit: 1000000n, // Higher for deployment
-            preVerificationGas: 500000n,
+            preVerificationGas: 600000n, // Increased from 500000n
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
             paymasterAndData: '0x' as `0x${string}`,
@@ -373,7 +435,9 @@ export async function deploySmartAccount(
             if (gasEstimate) {
                 userOp.callGasLimit = BigInt(gasEstimate.callGasLimit || '0x186a0');
                 userOp.verificationGasLimit = BigInt(gasEstimate.verificationGasLimit || '0xf4240');
-                userOp.preVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x7a120');
+                // Ensure preVerificationGas is at least 600000 or the estimated value, whichever is higher
+                const estimatedPreVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x927c0');
+                userOp.preVerificationGas = estimatedPreVerificationGas > 600000n ? estimatedPreVerificationGas : 600000n;
             }
         } catch (e: any) {
             console.warn('Gas estimation failed, using defaults:', e.message);
@@ -514,7 +578,7 @@ export async function deploySmartAccountWithWallet(
             callData: '0x' as `0x${string}`, // Empty call - just deploy
             callGasLimit: 100000n,
             verificationGasLimit: 1000000n, // Higher for deployment
-            preVerificationGas: 500000n,
+            preVerificationGas: 600000n, // Increased from 500000n
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
             paymasterAndData: '0x' as `0x${string}`,
@@ -531,10 +595,24 @@ export async function deploySmartAccountWithWallet(
             if (gasEstimate) {
                 userOp.callGasLimit = BigInt(gasEstimate.callGasLimit || '0x186a0');
                 userOp.verificationGasLimit = BigInt(gasEstimate.verificationGasLimit || '0xf4240');
-                userOp.preVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x7a120');
+                // Ensure preVerificationGas is at least 600000 or the estimated value, whichever is higher
+                const estimatedPreVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x927c0');
+                userOp.preVerificationGas = estimatedPreVerificationGas > 600000n ? estimatedPreVerificationGas : 600000n;
             }
         } catch (e: any) {
             console.warn('Gas estimation failed, using defaults:', e.message);
+        }
+
+        // Get paymaster data from Thirdweb (for sponsored gas)
+        try {
+            const paymasterData = await getThirdwebPaymasterData(
+                userOp,
+                network.entryPoint,
+                network.chain.id
+            );
+            userOp.paymasterAndData = paymasterData.paymasterAndData;
+        } catch (e: any) {
+            console.warn('Failed to get paymaster data, user will pay gas:', e.message);
         }
 
         // Sign UserOperation using Thirdweb wallet

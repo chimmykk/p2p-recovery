@@ -60,6 +60,20 @@ export default function Home() {
                 P2P.ME
               </h1>
             </div>
+            
+            {/* Help & Support Button */}
+            <a
+              href="https://t.me/P2Pdotme"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+              </svg>
+              <span className="hidden sm:inline">Help & Support</span>
+            </a>
           </div>
         </div>
       </nav>
@@ -103,7 +117,7 @@ export default function Home() {
 
         {/* Compact Connect Wallet Button */}
         <div className="mb-8 sm:mb-10 md:mb-12 flex justify-start">
-          <WalletConnect onP2PWalletChange={setP2pUserWallet} compact />
+          <WalletConnect onP2PWalletChange={setP2pUserWallet} compact selectedNetwork={selectedNetwork} />
         </div>
 
         {/* Network Selector - Mobile Only (shows after stats cards) */}

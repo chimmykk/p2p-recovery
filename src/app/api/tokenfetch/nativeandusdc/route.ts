@@ -70,10 +70,14 @@ export async function POST(request: NextRequest) {
       allTokenAddresses.add(log.address.toLowerCase())
     })
 
-    // Fetch balances for all tokens
+    // Fetch balances for all tokens (excluding USDC as we'll add it explicitly later)
     const tokensWithBalance = []
+    const usdcAddressLower = networkConfig.usdcAddress.toLowerCase()
 
     for (const tokenAddr of allTokenAddresses) {
+      // Skip USDC here as we'll add it explicitly later
+      if (tokenAddr === usdcAddressLower) continue
+      
       try {
         const contract = new ethers.Contract(tokenAddr, ERC20_ABI, provider)
         const bal = await contract.balanceOf(address)

@@ -1,7 +1,7 @@
 import { defineChain, Address } from 'viem';
 import { defineChain as defineThirdwebChain } from "thirdweb/chains";
 
-// Thirdweb chain def method use only when using thirdweb ui for displaying wallet components
+// Thirdweb chain definitions for wallet UI components
 export const monadChain = defineThirdwebChain({
     id: 143,
     name: "Monad Mainnet",
@@ -11,6 +11,94 @@ export const monadChain = defineThirdwebChain({
         symbol: "MON",
     },
     rpc: "https://rpc3.monad.xyz",
+});
+
+export const bnbThirdwebChain = defineThirdwebChain({
+    id: 56,
+    name: "BNB Smart Chain",
+    nativeCurrency: {
+        decimals: 18,
+        name: "BNB",
+        symbol: "BNB",
+    },
+    rpc: "https://1rpc.io/bnb",
+});
+
+export const avalancheThirdwebChain = defineThirdwebChain({
+    id: 43114,
+    name: "Avalanche C-Chain",
+    nativeCurrency: {
+        decimals: 18,
+        name: "Avalanche",
+        symbol: "AVAX",
+    },
+    rpc: "https://avax.api.pocket.network",
+});
+
+export const polygonThirdwebChain = defineThirdwebChain({
+    id: 137,
+    name: "Polygon",
+    nativeCurrency: {
+        decimals: 18,
+        name: "MATIC",
+        symbol: "MATIC",
+    },
+    rpc: "https://polygon-rpc.com",
+});
+
+export const optimismThirdwebChain = defineThirdwebChain({
+    id: 10,
+    name: "Optimism",
+    nativeCurrency: {
+        decimals: 18,
+        name: "Ether",
+        symbol: "ETH",
+    },
+    rpc: "https://optimism-public.nodies.app",
+});
+
+export const hyperliquidThirdwebChain = defineThirdwebChain({
+    id: 999,
+    name: "HyperLiquid",
+    nativeCurrency: {
+        decimals: 18,
+        name: "HyperLiquid",
+        symbol: "HYPE",
+    },
+    rpc: "https://hyperliquid.drpc.org",
+});
+
+export const ethereumThirdwebChain = defineThirdwebChain({
+    id: 1,
+    name: "Ethereum",
+    nativeCurrency: {
+        decimals: 18,
+        name: "Ether",
+        symbol: "ETH",
+    },
+    rpc: "https://eth.llamarpc.com",
+});
+
+export const arbitrumThirdwebChain = defineThirdwebChain({
+    id: 42161,
+    name: "Arbitrum One",
+    nativeCurrency: {
+        decimals: 18,
+        name: "Ether",
+        symbol: "ETH",
+    },
+    rpc: "https://arb1.arbitrum.io/rpc",
+});
+
+export const mantleThirdwebChain = defineThirdwebChain({
+    id: 5000,
+    name: "Mantle",
+    nativeCurrency: {
+        decimals: 18,
+        name: "Mantle",
+        symbol: "MNT",
+    },
+    rpc: "https://1rpc.io/mantle",
 });
 // Custom chain def viem client
 
@@ -103,10 +191,10 @@ export const polygonChain = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://polygon-rpc.com'],
+            http: ['https://polygon.drpc.org'],
         },
         public: {
-            http: ['https://polygon-rpc.com'],
+            http: ['https://polygon.drpc.org'],
         },
     },
     blockExplorers: {
@@ -129,10 +217,10 @@ export const optimismChain = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://optimism-public.nodies.app'],
+            http: ['https://mainnet.optimism.io'],
         },
         public: {
-            http: ['https://optimism-public.nodies.app'],
+            http: ['https://mainnet.optimism.io'],
         },
     },
     blockExplorers: {
@@ -369,3 +457,16 @@ export function getNetworksSortedByLabel(): NetworkKey[] {
         NETWORK_LABELS[a].localeCompare(NETWORK_LABELS[b])
     );
 }
+
+// Map network keys to Thirdweb chains
+export const THIRDWEB_CHAINS: Record<NetworkKey, ReturnType<typeof defineThirdwebChain>> = {
+    monad: monadChain,
+    bnb: bnbThirdwebChain,
+    avax: avalancheThirdwebChain,
+    polygon: polygonThirdwebChain,
+    optimism: optimismThirdwebChain,
+    hyperliquid: hyperliquidThirdwebChain,
+    ethereum: ethereumThirdwebChain,
+    arbitrum: arbitrumThirdwebChain,
+    mantle: mantleThirdwebChain,
+};

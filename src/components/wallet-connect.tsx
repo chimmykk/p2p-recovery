@@ -5,15 +5,16 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ConnectButton, useActiveAccount, useActiveWallet, useActiveWalletChain, useDisconnect } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
 import { client } from "@/lib/thirdwebClient";
-import { monadChain } from "@/lib/network";
+import { THIRDWEB_CHAINS, type NetworkKey } from "@/lib/network";
 import { Loader2, LogOut, Copy, Check } from "lucide-react";
 
 interface WalletConnectProps {
   onP2PWalletChange?: (address: string) => void;
   compact?: boolean;
+  selectedNetwork?: NetworkKey;
 }
 
-export function WalletConnect({ onP2PWalletChange, compact = false }: WalletConnectProps) {
+export function WalletConnect({ onP2PWalletChange, compact = false, selectedNetwork = 'monad' }: WalletConnectProps) {
   const account = useActiveAccount();
   const wallet = useActiveWallet();
   const activeChain = useActiveWalletChain();
@@ -21,6 +22,9 @@ export function WalletConnect({ onP2PWalletChange, compact = false }: WalletConn
   const [p2pSmartAccount, setP2pSmartAccount] = useState<string>("");
   const [isLoadingP2PAccount, setIsLoadingP2PAccount] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  // Get the chain for the selected network
+  const selectedChain = THIRDWEB_CHAINS[selectedNetwork];
 
   // Fetch P2P.ME user address from Thirdweb accounts API
   useEffect(() => {
@@ -116,7 +120,7 @@ export function WalletConnect({ onP2PWalletChange, compact = false }: WalletConn
         ],
       },
       smartAccount: {
-        chain: monadChain,
+        chain: selectedChain,
         sponsorGas: true,
       },
     }),
@@ -141,7 +145,7 @@ export function WalletConnect({ onP2PWalletChange, compact = false }: WalletConn
     }
   };
 
-  const isWrongNetwork = account && activeChain?.id !== monadChain.id;
+  const isWrongNetwork = account && activeChain?.id !== selectedChain.id;
 
   // Custom Connected View for Compact Mode
   const CompactConnectedView = () => (
@@ -171,23 +175,23 @@ export function WalletConnect({ onP2PWalletChange, compact = false }: WalletConn
 
   // Compact mode: just show the button
   if (compact) {
-    if (account && !isWrongNetwork) {
+    if (account) {
       return <CompactConnectedView />;
     }
     return (
       <ConnectButton
         client={client}
         wallets={wallets}
-        chain={monadChain}
-        chains={[monadChain]}
+        chain={selectedChain}
+        chains={[selectedChain]}
         connectButton={{
-          label: isWrongNetwork ? "Switch Network" : "Connect Wallet",
+          label: "Connect Wallet",
           style: {
             height: "40px",
             fontSize: "14px",
             padding: "0 16px",
             minWidth: "140px",
-            backgroundColor: isWrongNetwork ? "#e11d48" : "#7469CE",
+            backgroundColor: "#7469CE",
             color: "#ffffff",
           },
         }}
@@ -273,8 +277,8 @@ export function WalletConnect({ onP2PWalletChange, compact = false }: WalletConn
           <ConnectButton
             client={client}
             wallets={wallets}
-            chain={monadChain}
-            chains={[monadChain]}
+            chain={selectedChain}
+            chains={[selectedChain]}
             connectButton={{
               label: isWrongNetwork ? "Switch Network" : "Connect Wallet",
               style: {
