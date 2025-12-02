@@ -51,10 +51,10 @@ export const bnbChain = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://bsc-dataseed1.binance.org'],
+            http: ['https://1rpc.io/bnb'],
         },
         public: {
-            http: ['https://bsc-dataseed1.binance.org'],
+            http: ['https://1rpc.io/bnb'],
         },
     },
     blockExplorers: {
@@ -233,10 +233,10 @@ export const mantleChain = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://mantle-public.nodies.app'],
+            http: ['https://1rpc.io/mantle'],
         },
         public: {
-            http: ['https://mantle-public.nodies.app'],
+            http: ['https://1rpc.io/mantle'],
         },
     },
     blockExplorers: {

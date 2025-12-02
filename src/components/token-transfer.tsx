@@ -17,11 +17,23 @@ import {
     getInitCode,
     signUserOpHashWithThirdwebWallet
 } from '@/lib/smart-account'
-import { Send, ArrowRight, Loader2, CheckCircle, AlertCircle, Copy, X, AlertTriangle } from 'lucide-react'
+import { ArrowRight, Loader2, CheckCircle, AlertCircle, Copy, X, AlertTriangle, ChevronDown } from 'lucide-react'
 import { NETWORKS, NETWORK_LABELS, type NetworkKey } from '@/lib/network'
 import { useActiveAccount, useActiveWallet } from 'thirdweb/react'
 
 const DUMMY_SIGNATURE = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c'
+
+interface TokenInfo {
+    symbol: string
+    name: string
+    address: string
+    balance: string
+    balanceRaw: string
+    decimals: number
+    imgUrl?: string
+    price?: number
+    balanceUSD?: number
+}
 
 interface TokenTransferProps {
     network: NetworkKey;
@@ -42,6 +54,11 @@ export function TokenTransfer({ network }: TokenTransferProps) {
     const [balance, setBalance] = useState('0')
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [fundingAddress, setFundingAddress] = useState<string>('')
+    const [tokens, setTokens] = useState<TokenInfo[]>([])
+    const [selectedToken, setSelectedToken] = useState<TokenInfo | null>(null)
+    const [isLoadingTokens, setIsLoadingTokens] = useState(false)
+    const [showTokenSelector, setShowTokenSelector] = useState(false)
+    const [fetchMethod, setFetchMethod] = useState<'free' | 'paid'>('free')
 
     useEffect(() => {
         const loadData = () => {
@@ -120,6 +137,29 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         }
     }, [network, smartAccountAddress])
 
+    // Reset token state when network changes
+    useEffect(() => {
+        // Clear all token-related state when network changes
+        setTokens([])
+        setSelectedToken(null)
+        setBalance('0')
+        setShowTokenSelector(false)
+        setError('')
+        setSuccess('')
+    }, [network])
+
+    // Auto-fetch tokens when smart account address or network changes
+    useEffect(() => {
+        if (smartAccountAddress && !isLoadingTokens) {
+            // Small delay to avoid multiple rapid calls
+            const timer = setTimeout(() => {
+                fetchTokens(fetchMethod)
+            }, 500)
+            
+            return () => clearTimeout(timer)
+        }
+    }, [smartAccountAddress, network, fetchMethod])
+
     const fetchBalance = async (address: Address) => {
         if (!address) {
             setBalance('0')
@@ -140,6 +180,66 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         navigator.clipboard.writeText(text)
         setSuccess('Address copied to clipboard!')
         setTimeout(() => setSuccess(''), 2000)
+    }
+
+    const fetchTokens = async (method: 'free' | 'paid' = 'free') => {
+        if (!smartAccountAddress) {
+            setError('Please derive your smart account address first')
+            return
+        }
+
+        // Clear old token data before fetching new ones
+        setTokens([])
+        setSelectedToken(null)
+        setIsLoadingTokens(true)
+        setError('')
+        
+        try {
+            const endpoint = method === 'free' ? '/api/tokenfetch/nativeandusdc' : '/api/tokenfetch/otherstoken'
+            const networkConfig = NETWORKS[network]
+            
+            const body = { 
+                address: smartAccountAddress, 
+                chainId: networkConfig.chain.id 
+            }
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch tokens')
+            }
+
+            const data = await response.json()
+            const fetchedTokens = data.tokens || []
+            
+            setTokens(fetchedTokens)
+            
+            // Auto-select USDC if available
+            const usdcToken = fetchedTokens.find((t: TokenInfo) => 
+                t.address.toLowerCase() === networkConfig.usdcAddress.toLowerCase()
+            )
+            if (usdcToken) {
+                setSelectedToken(usdcToken)
+                setBalance(usdcToken.balance)
+            } else if (fetchedTokens.length > 0) {
+                setSelectedToken(fetchedTokens[0])
+                setBalance(fetchedTokens[0].balance)
+            }
+
+            // Optionally show success message only if tokens found
+            if (fetchedTokens.length > 0) {
+                console.log(`Found ${fetchedTokens.length} token(s) using ${method === 'free' ? 'Native & USDC' : 'Zapper API'}`)
+            }
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch tokens')
+            console.error('Error fetching tokens:', err)
+        } finally {
+            setIsLoadingTokens(false)
+        }
     }
 
     const handleTransfer = async () => {
@@ -172,12 +272,20 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         }
 
         const networkConfig = NETWORKS[network];
-        const multiplier = Math.pow(10, networkConfig.usdcDecimals)
+        
+        // Use selected token or fallback to USDC
+        const tokenToTransfer = selectedToken || {
+            address: networkConfig.usdcAddress,
+            decimals: networkConfig.usdcDecimals,
+            symbol: 'USDC'
+        }
+        
+        const multiplier = Math.pow(10, tokenToTransfer.decimals)
         const transferAmount = BigInt(Math.round(parseFloat(amount) * multiplier))
         const currentBalance = BigInt(Math.round(parseFloat(balance) * multiplier))
 
         if (transferAmount > currentBalance) {
-            setError(`Insufficient balance. You have ${balance} USDC`)
+            setError(`Insufficient balance. You have ${balance} ${tokenToTransfer.symbol}`)
             return
         }
 
@@ -212,19 +320,33 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 args: [smartAccountAddress as Address, 0n],
             })
 
-            // Encode transfer call
-            const transferCallData = encodeFunctionData({
-                abi: ERC20_ABI,
-                functionName: 'transfer',
-                args: [finalRecipient as Address, transferAmount],
-            })
+            // Check if this is a native token transfer (address is 0x0000...)
+            const isNativeToken = tokenToTransfer.address === "0x0000000000000000000000000000000000000000"
+            
+            let executeCallData: `0x${string}`
+            
+            if (isNativeToken) {
+                // For native token, send value directly without calldata
+                executeCallData = encodeFunctionData({
+                    abi: SMART_ACCOUNT_ABI,
+                    functionName: 'execute',
+                    args: [finalRecipient as Address, transferAmount, '0x' as `0x${string}`],
+                })
+            } else {
+                // For ERC20 tokens, encode transfer call
+                const transferCallData = encodeFunctionData({
+                    abi: ERC20_ABI,
+                    functionName: 'transfer',
+                    args: [finalRecipient as Address, transferAmount],
+                })
 
-            // Wrap in smart account execute
-            const executeCallData = encodeFunctionData({
-                abi: SMART_ACCOUNT_ABI,
-                functionName: 'execute',
-                args: [networkConfig.usdcAddress, 0n, transferCallData],
-            })
+                // Wrap in smart account execute
+                executeCallData = encodeFunctionData({
+                    abi: SMART_ACCOUNT_ABI,
+                    functionName: 'execute',
+                    args: [tokenToTransfer.address as Address, 0n, transferCallData],
+                })
+            }
 
             // Get gas prices from Pimlico
             let maxFeePerGas: bigint
@@ -322,8 +444,8 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 setTxHash(receipt.receipt?.transactionHash || '')
                 const deployMsg = !deployed ? ' (Account deployed and transfer completed!)' : ''
                 const actionMsg = transferMode === 'recover'
-                    ? `Recovery successful! ${amount} USDC sent to owner address`
-                    : `Transfer successful! ${amount} USDC sent to ${finalRecipient}`
+                    ? `Recovery successful! ${amount} ${tokenToTransfer.symbol} sent to owner address`
+                    : `Transfer successful! ${amount} ${tokenToTransfer.symbol} sent to ${finalRecipient}`
                 setSuccess(`${actionMsg}${deployMsg}`)
 
                 // Refresh balance
@@ -365,119 +487,137 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                     </span>
                     <h2 className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-50 mt-2">Token Transfer</h2>
                 </div>
+                {isLoadingTokens && (
+                    <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="hidden sm:inline">Loading tokens...</span>
+                    </div>
+                )}
             </div>
 
-            {/* Tab Navigation */}
-            <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                <button
-                    onClick={() => {
-                        setTransferMode('send')
-                        setError('')
-                        setSuccess('')
-                    }}
-                    className="flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all shadow-md"
-                    style={{
-                        backgroundColor: transferMode === 'send' ? '#8984d9' : '#f5f5f5',
-                        color: transferMode === 'send' ? '#ffffff' : '#737373'
-                    }}
-                    onMouseEnter={(e) => {
-                        if (transferMode !== 'send') {
-                            e.currentTarget.style.backgroundColor = '#e5e5e5'
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (transferMode !== 'send') {
-                            e.currentTarget.style.backgroundColor = '#f5f5f5'
-                        }
-                    }}
-                >
-                    <div className="flex items-center justify-center gap-2">
-                        <Send className="w-4 h-4" />
-                        Send USDC
-                    </div>
-                </button>
-                <button
-                    onClick={() => {
-                        setTransferMode('recover')
-                        setError('')
-                        setSuccess('')
-                    }}
-                    className="flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all shadow-md"
-                    style={{
-                        backgroundColor: transferMode === 'recover' ? '#8984d9' : '#f5f5f5',
-                        color: transferMode === 'recover' ? '#ffffff' : '#737373'
-                    }}
-                    onMouseEnter={(e) => {
-                        if (transferMode !== 'recover') {
-                            e.currentTarget.style.backgroundColor = '#e5e5e5'
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (transferMode !== 'recover') {
-                            e.currentTarget.style.backgroundColor = '#f5f5f5'
-                        }
-                    }}
-                >
-                    <div className="flex items-center justify-center gap-2">
-                        <ArrowRight className="w-4 h-4 rotate-180" />
-                        <span className="hidden sm:inline">Recover to Owner</span>
-                        <span className="sm:hidden">Recover</span>
-                    </div>
-                </button>
-            </div>
-
-            {/* Mode Description */}
-            <div className={`p-3 rounded-lg border mb-5 ${transferMode === 'send'
-                ? 'bg-info-light dark:bg-info-dark/20 border-info/20'
-                : 'bg-brand-50 dark:bg-brand-950/20 border-brand-200 dark:border-brand-800'
-                }`}>
-                <p className="text-xs md:text-sm text-neutral-700 dark:text-neutral-300">
-                    {transferMode === 'send'
-                        ? 'Send USDC from your smart account to any address'
-                        : 'Recover USDC from your smart account back to your owner wallet'
+            {/* Fetch Method Selector */}
+            <div className="mb-4 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
+                <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Token Fetch Method:</p>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setFetchMethod('free')}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all ${
+                            fetchMethod === 'free'
+                                ? 'bg-[#8984d9] text-white shadow-sm'
+                                : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-600'
+                        }`}
+                    >
+                        Native &amp; USDC
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFetchMethod('paid')}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all ${
+                            fetchMethod === 'paid'
+                                ? 'bg-[#8984d9] text-white shadow-sm'
+                                : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-600'
+                        }`}
+                    >
+                        Other Tokens
+                    </button>
+                </div>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
+                    {fetchMethod === 'free' 
+                        ? 'Fetches native token and USDC balances'
+                        : 'Complete portfolio scan via Zapper (more comprehensive)'
                     }
                 </p>
             </div>
 
             <div className="space-y-4">
+                {/* Token Selector */}
+                {tokens.length > 0 && (
+                    <div>
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                            Select Token
+                        </label>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowTokenSelector(!showTokenSelector)}
+                                className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-left flex items-center justify-between hover:border-brand-500 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    {selectedToken?.imgUrl && (
+                                        <img src={selectedToken.imgUrl} alt={selectedToken.symbol} className="w-6 h-6 rounded-full" />
+                                    )}
+                                    <div>
+                                        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
+                                            {selectedToken?.symbol || 'Select Token'}
+                                        </p>
+                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                            {selectedToken?.name || 'No token selected'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform ${showTokenSelector ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {/* Token Dropdown */}
+                            {showTokenSelector && (
+                                <div className="absolute z-10 w-full mt-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    {tokens.map((token) => (
+                                        <button
+                                            key={token.address}
+                                            onClick={() => {
+                                                setSelectedToken(token)
+                                                setBalance(token.balance)
+                                                setShowTokenSelector(false)
+                                            }}
+                                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-b border-neutral-100 dark:border-neutral-700 last:border-b-0"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {token.imgUrl && (
+                                                    <img src={token.imgUrl} alt={token.symbol} className="w-6 h-6 rounded-full" />
+                                                )}
+                                                <div className="text-left">
+                                                    <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">{token.symbol}</p>
+                                                    <p className="text-xs text-neutral-500 dark:text-neutral-400">{token.name}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
+                                                    {parseFloat(token.balance).toFixed(2)}
+                                                </p>
+                                                {token.balanceUSD && (
+                                                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                        ${token.balanceUSD.toFixed(2)}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* Balance Display */}
                 <div className="p-4 bg-gradient-to-br from-success-light to-success-light/50 dark:from-success-dark/20 dark:to-success-dark/10 rounded-lg border border-success/20">
                     <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Available Balance</p>
-                    <p className="text-3xl font-semibold text-neutral-900 dark:text-neutral-50">${balance}</p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">USDC on {NETWORK_LABELS[network]}</p>
+                    <p className="text-3xl font-semibold text-neutral-900 dark:text-neutral-50">
+                        {parseFloat(balance).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                        {selectedToken?.symbol || 'USDC'} on {NETWORK_LABELS[network]}
+                    </p>
+                    {selectedToken?.balanceUSD && (
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                            ≈ ${selectedToken.balanceUSD.toFixed(2)} USD
+                        </p>
+                    )}
                 </div>
-
-                {/* Recipient Input */}
-                {transferMode === 'send' ? (
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            Recipient Address
-                        </label>
-                        <input
-                            type="text"
-                            value={recipient}
-                            onChange={(e) => setRecipient(e.target.value)}
-                            placeholder="0x..."
-                            className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                        />
-                    </div>
-                ) : (
-                    <div>
-                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            Recovery Destination
-                        </label>
-                        <div className="p-4 bg-brand-50 dark:bg-brand-950/20 border border-brand-200 dark:border-brand-800 rounded-lg">
-                            <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-2">Owner Address (Auto-filled)</p>
-                            <p className="text-neutral-900 dark:text-neutral-50 font-mono text-sm break-all">{ownerAddress || 'Not available'}</p>
-                        </div>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">Funds will be recovered to your owner address</p>
-                    </div>
-                )}
 
                 {/* Amount Input */}
                 <div>
                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                        Amount (USDC)
+                        Amount ({selectedToken?.symbol || 'USDC'})
                     </label>
                     <div className="relative">
                         <input
@@ -489,7 +629,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                             className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                         <button
-                            onClick={() => setAmount(balance)}
+                            onClick={() => setAmount(parseFloat(balance).toFixed(2))}
                             className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-semibold text-white rounded-md transition-colors"
                             style={{ backgroundColor: '#8984d9' }}
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#7469ce'}
@@ -498,6 +638,52 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                             Max
                         </button>
                     </div>
+                </div>
+
+                {/* Recipient Input */}
+                <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                        Recipient Address
+                    </label>
+                    <input
+                        type="text"
+                        value={recipient}
+                        onChange={(e) => setRecipient(e.target.value)}
+                        placeholder="0x..."
+                        className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        disabled={transferMode === 'recover'}
+                    />
+                    
+                    {/* Recover to Owner Button */}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (transferMode === 'recover') {
+                                setTransferMode('send')
+                                setRecipient('')
+                            } else {
+                                setTransferMode('recover')
+                                setRecipient(ownerAddress)
+                            }
+                            setError('')
+                            setSuccess('')
+                        }}
+                        className={`mt-3 w-full px-4 py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                            transferMode === 'recover'
+                                ? 'bg-[#8984d9] text-white shadow-md'
+                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                        }`}
+                    >
+                        <ArrowRight className="w-4 h-4 rotate-180" />
+                        {transferMode === 'recover' ? 'Recovering to Owner' : 'Recover to Owner'}
+                    </button>
+                    
+                    {transferMode === 'recover' && (
+                        <div className="mt-3 p-3 bg-brand-50 dark:bg-brand-950/20 border border-brand-200 dark:border-brand-800 rounded-lg">
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-1">Owner Address:</p>
+                            <p className="text-neutral-900 dark:text-neutral-50 font-mono text-xs break-all">{ownerAddress || 'Not available'}</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Transfer Button */}
@@ -514,16 +700,19 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                             <Loader2 className="w-5 h-5 animate-spin text-neutral-600" />
                             <span className="text-neutral-600">Processing...</span>
                         </>
-                    ) : transferMode === 'send' ? (
-                        <>
-                            Send USDC
-                            <ArrowRight className="w-5 h-5" />
-                        </>
                     ) : (
                         <>
-                            <ArrowRight className="w-5 h-5 rotate-180" />
-                            <span className="hidden sm:inline">Recover to Owner</span>
-                            <span className="sm:hidden">Recover</span>
+                            {transferMode === 'recover' ? (
+                                <>
+                                    <ArrowRight className="w-5 h-5 rotate-180" />
+                                    Recover to Owner
+                                </>
+                            ) : (
+                                <>
+                                    Send {selectedToken?.symbol || 'Token'}
+                                    <ArrowRight className="w-5 h-5" />
+                                </>
+                            )}
                         </>
                     )}
                 </button>

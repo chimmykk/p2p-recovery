@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { TokenTransfer } from '@/components/token-transfer'
-import { NetworkRequestForm } from '@/components/network-request-form'
-import { NetworkRequestsList } from '@/components/network-requests-list'
+// import { NetworkRequestForm } from '@/components/network-request-form'
+// import { NetworkRequestsList } from '@/components/network-requests-list'
 import { WalletConnect } from '@/components/wallet-connect'
 import { SmartAccountDisplay } from '@/components/smart-account-display'
 import { ChevronDown, Search, Wallet } from 'lucide-react'
@@ -247,7 +247,7 @@ export default function Home() {
         </div>
 
         {/* Network Requests Section */}
-        <div className="mt-16 md:mt-24">
+        {/* <div className="mt-16 md:mt-24">
           <div className="mb-8 md:mb-10 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-neutral-900 dark:text-neutral-50 mb-3">
               Community Network Requests
@@ -261,7 +261,8 @@ export default function Home() {
             <NetworkRequestForm />
             <NetworkRequestsList />
           </div>
-        </div>
+        </div> */}
+        { /* comment out network section */ }
       </main>
 
       {/* Footer */}
