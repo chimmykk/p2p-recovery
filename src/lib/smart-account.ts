@@ -295,7 +295,7 @@ export async function getThirdwebPaymasterData(
         }
 
         if (data.result?.paymasterAndData) {
-            console.log('✅ Gas sponsored by Thirdweb paymaster');
+            console.log('Gas sponsored by Thirdweb paymaster');
             return { paymasterAndData: data.result.paymasterAndData as `0x${string}` };
         }
 
@@ -418,7 +418,7 @@ export async function deploySmartAccount(
             callData: '0x' as `0x${string}`, // Empty call - just deploy
             callGasLimit: 100000n,
             verificationGasLimit: 1000000n, // Higher for deployment
-            preVerificationGas: 500000n,
+            preVerificationGas: 600000n, // Increased from 500000n
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
             paymasterAndData: '0x' as `0x${string}`,
@@ -435,7 +435,9 @@ export async function deploySmartAccount(
             if (gasEstimate) {
                 userOp.callGasLimit = BigInt(gasEstimate.callGasLimit || '0x186a0');
                 userOp.verificationGasLimit = BigInt(gasEstimate.verificationGasLimit || '0xf4240');
-                userOp.preVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x7a120');
+                // Ensure preVerificationGas is at least 600000 or the estimated value, whichever is higher
+                const estimatedPreVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x927c0');
+                userOp.preVerificationGas = estimatedPreVerificationGas > 600000n ? estimatedPreVerificationGas : 600000n;
             }
         } catch (e: any) {
             console.warn('Gas estimation failed, using defaults:', e.message);
@@ -576,7 +578,7 @@ export async function deploySmartAccountWithWallet(
             callData: '0x' as `0x${string}`, // Empty call - just deploy
             callGasLimit: 100000n,
             verificationGasLimit: 1000000n, // Higher for deployment
-            preVerificationGas: 500000n,
+            preVerificationGas: 600000n, // Increased from 500000n
             maxFeePerGas: maxFeePerGas,
             maxPriorityFeePerGas: maxPriorityFeePerGas,
             paymasterAndData: '0x' as `0x${string}`,
@@ -593,7 +595,9 @@ export async function deploySmartAccountWithWallet(
             if (gasEstimate) {
                 userOp.callGasLimit = BigInt(gasEstimate.callGasLimit || '0x186a0');
                 userOp.verificationGasLimit = BigInt(gasEstimate.verificationGasLimit || '0xf4240');
-                userOp.preVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x7a120');
+                // Ensure preVerificationGas is at least 600000 or the estimated value, whichever is higher
+                const estimatedPreVerificationGas = BigInt(gasEstimate.preVerificationGas || '0x927c0');
+                userOp.preVerificationGas = estimatedPreVerificationGas > 600000n ? estimatedPreVerificationGas : 600000n;
             }
         } catch (e: any) {
             console.warn('Gas estimation failed, using defaults:', e.message);
