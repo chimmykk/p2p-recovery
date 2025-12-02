@@ -133,7 +133,6 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                     setBalance('0')
                 })
         } else {
-            // Clear balance if no smart account address
             setBalance('0')
         }
     }, [network, smartAccountAddress])
@@ -219,7 +218,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
             
             setTokens(fetchedTokens)
             
-            // Auto-select USDC if available
+            // Set priority to usdc as most user sents usdc tokens
             const usdcToken = fetchedTokens.find((t: TokenInfo) => 
                 t.address.toLowerCase() === networkConfig.usdcAddress.toLowerCase()
             )
@@ -286,7 +285,9 @@ export function TokenTransfer({ network }: TokenTransferProps) {
         const currentBalance = BigInt(Math.round(parseFloat(balance) * multiplier))
 
         if (transferAmount > currentBalance) {
-            setError(`Insufficient balance. You have ${balance} ${tokenToTransfer.symbol}`)
+            const balanceNum = parseFloat(balance)
+            const displayBalance = Math.floor(balanceNum * 1000) / 1000
+            setError(`Insufficient balance. You have ${displayBalance} ${tokenToTransfer.symbol}`)
             return
         }
 
@@ -410,10 +411,13 @@ export function TokenTransfer({ network }: TokenTransferProps) {
 
             // Sign UserOperation using Thirdweb wallet (owner account, not smart account)
             // The owner account is the one that controls the smart account
+
             userOp.signature = '0x' as `0x${string}`
             const userOpHash = getUserOpHash(userOp, networkConfig.entryPoint, networkConfig.chain.id)
 
             // Get owner account address (the connected wallet address that controls the smart account)
+
+            // Most of this function is deprecated or not in used (as default pay master is triggered)
             let ownerAddress = account.address as Address
             if (wallet.getAdminAccount) {
                 try {
@@ -576,9 +580,9 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                             {/* Token Dropdown */}
                             {showTokenSelector && (
                                 <div className="absolute z-10 w-full mt-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                    {tokens.map((token) => (
+                                    {tokens.map((token, index) => (
                                         <button
-                                            key={token.address}
+                                            key={`${token.address}-${index}`}
                                             onClick={() => {
                                                 setSelectedToken(token)
                                                 setBalance(token.balance)
@@ -617,7 +621,7 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 <div className="p-4 bg-gradient-to-br from-success-light to-success-light/50 dark:from-success-dark/20 dark:to-success-dark/10 rounded-lg border border-success/20">
                     <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Available Balance</p>
                     <p className="text-3xl font-semibold text-neutral-900 dark:text-neutral-50">
-                        {parseFloat(balance).toFixed(2)}
+                        {parseFloat(balance).toFixed(4)}
                     </p>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                         {selectedToken?.symbol || 'USDC'} on {NETWORK_LABELS[network]}

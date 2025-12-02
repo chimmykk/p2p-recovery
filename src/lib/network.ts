@@ -191,10 +191,10 @@ export const polygonChain = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://polygon-rpc.com'],
+            http: ['https://polygon.drpc.org'],
         },
         public: {
-            http: ['https://polygon-rpc.com'],
+            http: ['https://polygon.drpc.org'],
         },
     },
     blockExplorers: {
@@ -217,10 +217,10 @@ export const optimismChain = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://optimism-public.nodies.app'],
+            http: ['https://mainnet.optimism.io'],
         },
         public: {
-            http: ['https://optimism-public.nodies.app'],
+            http: ['https://mainnet.optimism.io'],
         },
     },
     blockExplorers: {

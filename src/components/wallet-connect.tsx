@@ -175,7 +175,7 @@ export function WalletConnect({ onP2PWalletChange, compact = false, selectedNetw
 
   // Compact mode: just show the button
   if (compact) {
-    if (account && !isWrongNetwork) {
+    if (account) {
       return <CompactConnectedView />;
     }
     return (
@@ -185,13 +185,13 @@ export function WalletConnect({ onP2PWalletChange, compact = false, selectedNetw
         chain={selectedChain}
         chains={[selectedChain]}
         connectButton={{
-          label: isWrongNetwork ? "Switch Network" : "Connect Wallet",
+          label: "Connect Wallet",
           style: {
             height: "40px",
             fontSize: "14px",
             padding: "0 16px",
             minWidth: "140px",
-            backgroundColor: isWrongNetwork ? "#e11d48" : "#7469CE",
+            backgroundColor: "#7469CE",
             color: "#ffffff",
           },
         }}
