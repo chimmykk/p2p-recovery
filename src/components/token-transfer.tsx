@@ -15,7 +15,8 @@ import {
     getTokenBalance,
     isAccountDeployed,
     getInitCode,
-    signUserOpHashWithThirdwebWallet
+    signUserOpHashWithThirdwebWallet,
+    getThirdwebPaymasterData
 } from '@/lib/smart-account'
 import { ArrowRight, Loader2, CheckCircle, AlertCircle, Copy, X, AlertTriangle, ChevronDown } from 'lucide-react'
 import { NETWORKS, NETWORK_LABELS, type NetworkKey } from '@/lib/network'
@@ -391,6 +392,18 @@ export function TokenTransfer({ network }: TokenTransferProps) {
                 }
             } catch (e: any) {
                 console.warn('Gas estimation failed, using defaults:', e.message)
+            }
+
+            // Get paymaster data from Thirdweb (for sponsored gas)
+            try {
+                const paymasterData = await getThirdwebPaymasterData(
+                    userOp,
+                    networkConfig.entryPoint,
+                    networkConfig.chain.id
+                )
+                userOp.paymasterAndData = paymasterData.paymasterAndData
+            } catch (e: any) {
+                console.warn('Failed to get paymaster data, user will pay gas:', e.message)
             }
 
             // Sign UserOperation using Thirdweb wallet (owner account, not smart account)
